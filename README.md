@@ -92,6 +92,15 @@ docker build -t reactbackend/backend-starter .
 docker run -e "SPRING_PROFILES_ACTIVE=prod" -p 8080:8080 -t reactbackend/backend-starter
 ```
 
+Build image with maven:
+```
+# Maven wrapper
+./mvnw spring-boot:build-image -Dspring-boot.build-image.imageName=reactbackend/backend-starter
+
+# Maven installation
+mvn spring-boot:build-image -Dspring-boot.build-image.imageName=reactbackend/backend-starter
+```
+
 To debug:
 ```
 docker run -e "JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=5005,server=y,suspend=n" -p 8080:8080 -p 5005:5005 -t springio/gs-spring-boot-docker
