@@ -105,3 +105,11 @@ To debug:
 ```
 docker run -e "JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=5005,server=y,suspend=n" -p 8080:8080 -p 5005:5005 -t springio/gs-spring-boot-docker
 ```
+
+Tested on the following:
+```
+Docker version 20.10.12, build 20.10.12-0ubuntu4
+docker-compose version 1.29.2
+Apache Maven 3.6.3
+Java version: 17.0.5
+```
