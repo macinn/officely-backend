@@ -3,7 +3,7 @@ This is the starter for the backend application.
 
 ### Installed Prerequisites
 In order to launch the application the following items must be installed:
-* [Java 11](https://adoptopenjdk.net/)
+* [Java 17](https://adoptium.net/temurin/releases/?version=17)
 * [Maven](https://maven.apache.org/download.cgi)
 * [MySQL Community Server + Workbench](https://dev.mysql.com/downloads/installer/)
 * [Git](https://git-scm.com/downloads)
