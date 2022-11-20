@@ -84,3 +84,15 @@ JWT_SECRET some secret value best if generated randommly
 - [save configuration](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environment-configuration-savedconfig.html)
 - [Azure Idea plugin](https://docs.microsoft.com/en-us/azure/developer/java/toolkit-for-intellij/create-hello-world-web-app)
 - Swagger url: [http://localhost:8080/swagger-ui/index.html]()
+
+### Docker
+To build and run:
+```
+docker build -t reactbackend/backend-starter .
+docker run -e "SPRING_PROFILES_ACTIVE=prod" -p 8080:8080 -t reactbackend/backend-starter
+```
+
+To debug:
+```
+docker run -e "JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,address=5005,server=y,suspend=n" -p 8080:8080 -p 5005:5005 -t springio/gs-spring-boot-docker
+```
