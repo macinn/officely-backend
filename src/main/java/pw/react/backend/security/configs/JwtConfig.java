@@ -1,5 +1,6 @@
 package pw.react.backend.security.configs;
 
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -13,8 +14,6 @@ import pw.react.backend.security.filters.JwtAuthenticationEntryPoint;
 import pw.react.backend.security.filters.JwtRequestFilter;
 import pw.react.backend.security.services.JwtTokenService;
 import pw.react.backend.security.services.JwtUserDetailsService;
-
-import javax.annotation.PostConstruct;
 
 @Configuration
 @ConfigurationProperties(prefix = "jwt")

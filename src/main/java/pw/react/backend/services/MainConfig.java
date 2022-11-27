@@ -1,5 +1,6 @@
 package pw.react.backend.services;
 
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +12,6 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import pw.react.backend.dao.*;
 
-import javax.annotation.PostConstruct;
 import java.util.*;
 
 import static java.util.stream.Collectors.toSet;

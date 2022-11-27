@@ -1,5 +1,6 @@
 package pw.react.backend.security.controllers;
 
+import jakarta.validation.Valid;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.*;
@@ -9,8 +10,6 @@ import pw.react.backend.security.models.JwtRequest;
 import pw.react.backend.security.models.JwtResponse;
 import pw.react.backend.security.services.JwtTokenService;
 import pw.react.backend.security.services.JwtUserDetailsService;
-
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping(path = JwtAuthenticationController.AUTHENTICATION_PATH)

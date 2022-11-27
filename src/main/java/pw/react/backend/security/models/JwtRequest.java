@@ -1,6 +1,7 @@
 package pw.react.backend.security.models;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
+
 import java.io.Serial;
 import java.io.Serializable;
 

@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,6 @@ import pw.react.backend.services.*;
 import pw.react.backend.web.CompanyDto;
 import pw.react.backend.web.UploadFileResponse;
 
-import javax.validation.Valid;
 import java.util.Collection;
 import java.util.List;
 

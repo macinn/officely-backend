@@ -1,8 +1,8 @@
 package pw.react.backend.models;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
 import java.util.Arrays;
 import java.util.Objects;
 
