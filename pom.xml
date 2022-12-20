@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>pw.react</groupId>
-	<artifactId>pw-2022-backend-starter</artifactId>
+	<artifactId>pw-backend-starter</artifactId>
 	<version>1.0.0</version>
 	<name>react-backend</name>
 	<description>Starter for the labs</description>
