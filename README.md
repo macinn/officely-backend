@@ -69,7 +69,7 @@ CORS_URLS urls of the frontend and backends for the bookly
 SPRING_PROFILES_ACTIVE prod-azure-mysql
 or
 SPRING_PROFILES_ACTIVE prod-azure-mysql,jwt
-JWT_SECRET some secret value best if generated randommly
+TOKEN_SECRET some secret value best if generated randommly
 ```
 7. IMPORTANT: In order to have access to the MySQL database, one have to change `Allow access to Azure services
    ` to `Yes` and add `Firewall rule` to access the database from specific IP (like home).
