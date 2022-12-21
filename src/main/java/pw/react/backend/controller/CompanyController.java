@@ -9,7 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -18,7 +21,9 @@ import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.exceptions.UnauthorizedException;
 import pw.react.backend.models.Company;
 import pw.react.backend.models.CompanyLogo;
-import pw.react.backend.services.*;
+import pw.react.backend.services.CompanyService;
+import pw.react.backend.services.LogoService;
+import pw.react.backend.services.SecurityService;
 import pw.react.backend.web.CompanyDto;
 import pw.react.backend.web.UploadFileResponse;
 
@@ -111,7 +116,7 @@ public class CompanyController {
     }
 
     @DeleteMapping(path = "/{companyId}")
-    public ResponseEntity<String> updateCompany(@RequestHeader HttpHeaders headers, @PathVariable Long companyId) {
+    public ResponseEntity<String> deleteCompany(@RequestHeader HttpHeaders headers, @PathVariable Long companyId) {
         logHeaders(headers);
         if (securityService.isAuthorized(headers)) {
             boolean deleted = companyService.deleteCompany(companyId);
