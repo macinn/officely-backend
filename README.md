@@ -43,11 +43,11 @@ RDS_PASSWORD MySQL password set during the creation
 RDS_PORT 3306 //MySQL server port
 RDS_USERNAME root //database user
 SERVER_PORT 5000 //it must be 5000 and it is defined in the application.properties
-CORS_URLS urls of the frontend and backends for the bookly
+CORS urls of the frontend and backends for the bookly
 SPRING_PROFILES_ACTIVE prod-aws-mysql
 or
 SPRING_PROFILES_ACTIVE prod-aws-mysql,jwt
-JWT_SECRET some secret value best if generated randommly
+TOKEN_SECRET some secret value best if generated randommly
 ```
 6. IMPORTANT: Add inbound rule to the db security group to allow access all inbound ips. Mysql/Aurora anywhere.
 
@@ -65,7 +65,7 @@ MYSQL_HOSTNAME something similar to this: aa16my1gs1126vw.czyphws3wq6b.eu-centra
 MYSQL_PASSWORD MySQL password set during the creation
 MYSQL_PORT 3306 //MySQL server port
 MYSQL_USERNAME root //database user
-CORS_URLS urls of the frontend and backends for the bookly
+CORS urls of the frontend and backends for the bookly
 SPRING_PROFILES_ACTIVE prod-azure-mysql
 or
 SPRING_PROFILES_ACTIVE prod-azure-mysql,jwt
