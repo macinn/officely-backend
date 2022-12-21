@@ -67,7 +67,6 @@ public class MainConfig {
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
-        getCorsUrls();
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
