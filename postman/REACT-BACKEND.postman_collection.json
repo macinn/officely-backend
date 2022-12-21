@@ -174,13 +174,13 @@
 					}
 				},
 				"url": {
-					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/comapnies/1",
+					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/companies/1",
 					"protocol": "{{PROTOCOL}}",
 					"host": [
 						"{{DOMAIN_URL}}"
 					],
 					"path": [
-						"comapnies",
+						"companies",
 						"1"
 					]
 				}
