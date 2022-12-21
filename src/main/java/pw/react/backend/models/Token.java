@@ -9,6 +9,7 @@ public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+    @Column(columnDefinition = "TEXT")
     private String value;
     private LocalDateTime created;
 
