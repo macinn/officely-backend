@@ -1,33 +1,49 @@
 package pw.react.backend.security.services;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
+import pw.react.backend.dao.TokenRepository;
+import pw.react.backend.models.Token;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.Serial;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class JwtTokenService implements Serializable {
 
+    private static final Logger log = LoggerFactory.getLogger(JwtTokenService.class);
+
+    @Serial
     private static final long serialVersionUID = -2550185165626007488L;
 
     private final String secret;
     private final long expirationMs;
+    private final TokenRepository tokenRepository;
 
-    public JwtTokenService(String secret, long expirationMs) {
+    public JwtTokenService(String secret, long expirationMs, TokenRepository tokenRepository) {
         this.secret = secret;
         this.expirationMs = expirationMs;
+        this.tokenRepository = tokenRepository;
     }
 
     public String getUsernameFromToken(String token) {
         return getClaimFromToken(token, Claims::getSubject);
     }
 
-    public Date getExpirationDateFromToken(String token) {
+    private Date getExpirationDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getExpiration);
     }
 
-    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
+    private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
     }
@@ -41,9 +57,39 @@ public class JwtTokenService implements Serializable {
         return expiration.before(new Date());
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails, HttpServletRequest request) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("ip", getClientIp(request));
+        claims.put("user-agent", getUserAgent(request));
+        log.info("Adding ip:{} and user-agent:{} to the claims.", getClientIp(request), getUserAgent(request));
         return doGenerateToken(claims, userDetails.getUsername());
+    }
+
+    private String getClientIpFromToken(String token) {
+        return getClaimFromToken(token, claims -> String.valueOf(claims.get("ip")));
+    }
+
+    private String getClientIp(HttpServletRequest request) {
+        String remoteAddr = "";
+        if (request != null) {
+            remoteAddr = request.getHeader("X-FORWARDED-FOR");
+            if (remoteAddr == null || "".equals(remoteAddr)) {
+                remoteAddr = request.getRemoteAddr();
+            }
+        }
+        return remoteAddr;
+    }
+
+    private String getUserAgent(HttpServletRequest request) {
+        String ua = "";
+        if (request != null) {
+            ua = request.getHeader("User-Agent");
+        }
+        return ua;
+    }
+
+    String getUserAgentFromToken(String token) {
+        return getClaimFromToken(token, claims -> String.valueOf(claims.get("user-agent")));
     }
 
     //while creating the token -
@@ -62,8 +108,38 @@ public class JwtTokenService implements Serializable {
                 .compact();
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
+    public Boolean validateToken(String token, UserDetails userDetails, HttpServletRequest request) {
+        Optional<Token> tokenOpt = tokenRepository.findByValue(token);
         final String username = getUsernameFromToken(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        return username.equals(userDetails.getUsername()) &&
+                !isTokenExpired(token) &&
+                isClientIpCorrect(token, request) &&
+                isValidUserAgent(token, request) &&
+                tokenOpt.isEmpty();
+    }
+
+    private boolean isValidUserAgent(String token, HttpServletRequest request) {
+        return getUserAgent(request).equals(getUserAgentFromToken(token));
+    }
+
+    private boolean isClientIpCorrect(String token, HttpServletRequest request) {
+        return getClientIp(request).equals(getClientIpFromToken(token));
+    }
+
+    public boolean invalidateToken(HttpServletRequest request) {
+        String authorizationHeader = "Authorization";
+        String bearer = "Bearer ";
+        String requestTokenHeader = request.getHeader(authorizationHeader);
+
+        if (requestTokenHeader != null && requestTokenHeader.startsWith(bearer)) {
+            tokenRepository.save(new Token(requestTokenHeader.replace(bearer, "")));
+            return true;
+        }
+        return false;
+    }
+
+    public void removeTokens() {
+        tokenRepository.deleteAll();
+        log.info("Tokens cleared.");
     }
 }

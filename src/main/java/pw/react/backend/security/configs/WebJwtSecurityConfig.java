@@ -40,10 +40,10 @@ public class WebJwtSecurityConfig {
                 // make sure we use stateless session; session won't be used to store user's state.
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 // dont authenticate this particular request
-                .authorizeHttpRequests()
-                .requestMatchers("/authenticate", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
+                .authorizeRequests().antMatchers("/auth/login").permitAll()
+                .antMatchers(HttpMethod.POST, "/users").permitAll()
+                .antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
+                .antMatchers( "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                 // all other requests need to be authenticated
                 .anyRequest().authenticated()
                 .and()
