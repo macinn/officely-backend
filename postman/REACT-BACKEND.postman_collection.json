@@ -280,6 +280,26 @@
 			"response": []
 		},
 		{
+			"name": "profiles",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/actuator/env/spring.profiles.active",
+					"protocol": "{{PROTOCOL}}",
+					"host": [
+						"{{DOMAIN_URL}}"
+					],
+					"path": [
+						"actuator",
+						"env",
+						"spring.profiles.active"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "health",
 			"request": {
 				"method": "GET",
