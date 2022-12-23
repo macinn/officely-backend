@@ -1,6 +1,7 @@
 package pw.react.backend.models;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;

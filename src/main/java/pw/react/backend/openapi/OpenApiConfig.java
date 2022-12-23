@@ -6,12 +6,11 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.*;
 import org.springframework.core.env.Environment;
 
 @Configuration
-@ConfigurationProperties(prefix = "application.springdoc")
+//@ConfigurationProperties(prefix = "application.springdoc")
 public class OpenApiConfig {
 
     private final Environment environment;

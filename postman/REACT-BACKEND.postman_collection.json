@@ -1,9 +1,8 @@
 {
 	"info": {
-		"_postman_id": "a6fada5c-643e-48f0-a271-22dd9dc77c7e",
+		"_postman_id": "54f65b86-223c-45d3-a13a-c86c260dcfe8",
 		"name": "REACT-BACKEND",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "10117192"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
@@ -56,7 +55,7 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.globals.unset(\"JWT_TOKEN\");"
+							"pm.globals.set(\"JWT_TOKEN\", null);"
 						],
 						"type": "text/javascript"
 					}
@@ -65,6 +64,15 @@
 			"request": {
 				"method": "POST",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
 					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/auth/logout",
 					"protocol": "{{PROTOCOL}}",
@@ -80,13 +88,14 @@
 			"response": []
 		},
 		{
-			"name": "delete-tokens",
+			"name": "remove tokens",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							""
+							"var jsonData = pm.response.json();\r",
+							"pm.globals.set(\"JWT_TOKEN\", jsonData.jwttoken);"
 						],
 						"type": "text/javascript"
 					}
@@ -95,6 +104,15 @@
 			"request": {
 				"method": "DELETE",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\" : \"pawg\",\r\n    \"password\" : \"pw2021\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
 					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/auth",
 					"protocol": "{{PROTOCOL}}",
@@ -130,7 +148,13 @@
 			"name": "create-companies",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "security-header",
+						"value": "secureMe",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "[{\r\n    \"name\" : \"TestNameAla2\",\r\n    \"startDateTime\" : \"2020-09-08T20:43:13\",\r\n    \"boardMembers\" : 1\r\n}]",
@@ -188,6 +212,25 @@
 			"response": []
 		},
 		{
+			"name": "actuator-loggers",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/actuator/loggers",
+					"protocol": "{{PROTOCOL}}",
+					"host": [
+						"{{DOMAIN_URL}}"
+					],
+					"path": [
+						"actuator",
+						"loggers"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "create-users",
 			"request": {
 				"auth": {
@@ -218,25 +261,6 @@
 			"response": []
 		},
 		{
-			"name": "actuator-loggers",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/actuator/loggers",
-					"protocol": "{{PROTOCOL}}",
-					"host": [
-						"{{DOMAIN_URL}}"
-					],
-					"path": [
-						"actuator",
-						"loggers"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "actuator-beans",
 			"request": {
 				"method": "GET",
@@ -256,7 +280,7 @@
 			"response": []
 		},
 		{
-			"name": "actuator-heatlh",
+			"name": "health",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -269,26 +293,6 @@
 					"path": [
 						"actuator",
 						"health"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "actuator-profiles",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/actuator/env/spring.profiles.active",
-					"protocol": "{{PROTOCOL}}",
-					"host": [
-						"{{DOMAIN_URL}}"
-					],
-					"path": [
-						"actuator",
-						"env",
-						"spring.profiles.active"
 					]
 				}
 			},

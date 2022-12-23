@@ -1,6 +1,10 @@
 package pw.react.backend.security.filters;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,10 +15,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import pw.react.backend.security.services.JwtTokenService;
 import pw.react.backend.security.services.JwtUserDetailsService;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -36,15 +36,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        final String requestTokenHeader = request.getHeader(AUTHORIZATION_HEADER);
-
         String username = null;
         String jwtToken = null;
+
+        final String requestTokenHeader = request.getHeader(AUTHORIZATION_HEADER);
         // JWT Token is in the form "Bearer token". Remove Bearer word and get only the Token
         if (requestTokenHeader != null && requestTokenHeader.startsWith(BEARER)) {
-            jwtToken = requestTokenHeader.substring(7);
             try {
-                username = jwtTokenService.getUsernameFromToken(jwtToken);
+                jwtToken = requestTokenHeader.substring(BEARER.length());
+                if (!"null".equals(jwtToken)) {
+                    username = jwtTokenService.getUsernameFromToken(jwtToken);
+                }
             } catch (IllegalArgumentException e) {
                 log.error("Unable to get JWT Token");
             } catch (ExpiredJwtException e) {

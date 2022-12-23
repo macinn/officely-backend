@@ -2,37 +2,49 @@ package pw.react.backend.security.services;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import pw.react.backend.dao.TokenRepository;
 import pw.react.backend.models.Token;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.crypto.SecretKey;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.function.Function;
 
 public class JwtTokenService implements Serializable {
 
-    private static final Logger log = LoggerFactory.getLogger(JwtTokenService.class);
-
     @Serial
     private static final long serialVersionUID = -2550185165626007488L;
+    private static final Logger log = LoggerFactory.getLogger(JwtTokenService.class);
+    private static final String EMPTY_STRING = "";
 
-    private final String secret;
     private final long expirationMs;
     private final TokenRepository tokenRepository;
+    private final SecretKey key;
+
+    private enum Const {
+        IP("ip"),
+        USER_AGENT("user-agent"),
+        X_FORWARDED_FOR("X-FORWARDED-FOR"),
+        AUTHORIZATION("Authorization"),
+        BEARER("Bearer ");
+        final String value;
+
+        Const(String value) {
+            this.value = value;
+        }
+    }
 
     public JwtTokenService(String secret, long expirationMs, TokenRepository tokenRepository) {
-        this.secret = secret;
         this.expirationMs = expirationMs;
         this.tokenRepository = tokenRepository;
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     public String getUsernameFromToken(String token) {
@@ -49,7 +61,11 @@ public class JwtTokenService implements Serializable {
     }
 
     private Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     private Boolean isTokenExpired(String token) {
@@ -59,21 +75,21 @@ public class JwtTokenService implements Serializable {
 
     public String generateToken(UserDetails userDetails, HttpServletRequest request) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("ip", getClientIp(request));
-        claims.put("user-agent", getUserAgent(request));
+        claims.put(Const.IP.value, getClientIp(request));
+        claims.put(Const.USER_AGENT.value, getUserAgent(request));
         log.info("Adding ip:{} and user-agent:{} to the claims.", getClientIp(request), getUserAgent(request));
         return doGenerateToken(claims, userDetails.getUsername());
     }
 
     private String getClientIpFromToken(String token) {
-        return getClaimFromToken(token, claims -> String.valueOf(claims.get("ip")));
+        return getClaimFromToken(token, claims -> String.valueOf(claims.get(Const.IP.value)));
     }
 
     private String getClientIp(HttpServletRequest request) {
-        String remoteAddr = "";
+        String remoteAddr = EMPTY_STRING;
         if (request != null) {
-            remoteAddr = request.getHeader("X-FORWARDED-FOR");
-            if (remoteAddr == null || "".equals(remoteAddr)) {
+            remoteAddr = request.getHeader(Const.X_FORWARDED_FOR.value);
+            if (remoteAddr == null || EMPTY_STRING.equals(remoteAddr)) {
                 remoteAddr = request.getRemoteAddr();
             }
         }
@@ -81,30 +97,24 @@ public class JwtTokenService implements Serializable {
     }
 
     private String getUserAgent(HttpServletRequest request) {
-        String ua = "";
+        String ua = EMPTY_STRING;
         if (request != null) {
-            ua = request.getHeader("User-Agent");
+            ua = request.getHeader(Const.USER_AGENT.value);
         }
         return ua;
     }
 
     String getUserAgentFromToken(String token) {
-        return getClaimFromToken(token, claims -> String.valueOf(claims.get("user-agent")));
+        return getClaimFromToken(token, claims -> String.valueOf(claims.get(Const.USER_AGENT.value)));
     }
 
-    //while creating the token -
-    //1. Define  claims of the token, like Issuer, Expiration, Subject, and the ID
-    //2. Sign the JWT using the HS512 algorithm and secret key.
-    //3. According to JWS Compact Serialization(https://tools.ietf.org/html/draft-ietf-jose-json-web-signature-41#section-3.1)
-    //   compaction of the JWT to a URL-safe string
     private String doGenerateToken(Map<String, Object> claims, String subject) {
-
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(SignatureAlgorithm.HS512, secret)
+                .signWith(key)
                 .compact();
     }
 
@@ -127,12 +137,10 @@ public class JwtTokenService implements Serializable {
     }
 
     public boolean invalidateToken(HttpServletRequest request) {
-        String authorizationHeader = "Authorization";
-        String bearer = "Bearer ";
-        String requestTokenHeader = request.getHeader(authorizationHeader);
+        String requestTokenHeader = request.getHeader(Const.AUTHORIZATION.value);
 
-        if (requestTokenHeader != null && requestTokenHeader.startsWith(bearer)) {
-            tokenRepository.save(new Token(requestTokenHeader.replace(bearer, "")));
+        if (requestTokenHeader != null && requestTokenHeader.startsWith(Const.BEARER.value)) {
+            tokenRepository.save(new Token(requestTokenHeader.substring(Const.BEARER.value.length())));
             return true;
         }
         return false;

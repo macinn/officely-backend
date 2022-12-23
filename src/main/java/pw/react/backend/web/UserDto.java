@@ -1,8 +1,7 @@
 package pw.react.backend.web;
 
+import jakarta.validation.constraints.Email;
 import pw.react.backend.models.User;
-
-import javax.validation.constraints.Email;
 
 public record UserDto(Long id, String username, String password, @Email String email) {
 
