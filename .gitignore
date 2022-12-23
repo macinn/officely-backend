@@ -1,6 +1,7 @@
 HELP.md
 target/
 logs/
+helps/
 
 .mvn/
 mvnw
