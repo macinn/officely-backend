@@ -1,6 +1,7 @@
 package pw.react.backend.models;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
