@@ -44,10 +44,9 @@ RDS_PORT 3306 //MySQL server port
 RDS_USERNAME root //database user
 SERVER_PORT 5000 //it must be 5000 and it is defined in the application.properties
 CORS urls of the frontend and backends for the bookly. Default value is *
-SPRING_PROFILES_ACTIVE prod-aws-mysql
-or
 SPRING_PROFILES_ACTIVE prod-aws-mysql,jwt
 TOKEN_SECRET [optional] some secret value best if generated randommly
+JWT_EXPIRATION_TIME [optional] by default token expires in 24 hours, it must be given in miliseconds
 ```
 6. IMPORTANT: Add inbound rule to the db security group to allow access all inbound ips. Mysql/Aurora anywhere.
 
@@ -66,10 +65,9 @@ MYSQL_PASSWORD MySQL password set during the creation
 MYSQL_PORT 3306 //MySQL server port
 MYSQL_USERNAME root //database user
 CORS urls of the frontend and backends for the bookly. Default value is *
-SPRING_PROFILES_ACTIVE prod-azure-mysql
-or
 SPRING_PROFILES_ACTIVE prod-azure-mysql,jwt
 TOKEN_SECRET [optional] some secret value best if generated randommly
+JWT_EXPIRATION_TIME [optional] by default token expires in 24 hours, it must be given in miliseconds
 ```
 7. IMPORTANT: In order to have access to the MySQL database, one have to change `Allow access to Azure services
    ` to `Yes` and add `Firewall rule` to access the database from specific IP (like home).
@@ -84,4 +82,4 @@ TOKEN_SECRET [optional] some secret value best if generated randommly
 - [save configuration](https://docs.aws.amazon.com/elasticbeanstalk/latest/dg/environment-configuration-savedconfig.html)
 - [Azure Idea plugin](https://docs.microsoft.com/en-us/azure/developer/java/toolkit-for-intellij/create-hello-world-web-app)
 - [Azure Toolkit plugin - Sign in instructions](https://learn.microsoft.com/en-us/azure/developer/java/toolkit-for-intellij/sign-in-instructions)
-- Swagger url: [http://localhost:8080/swagger-ui/index.html]()
+- [Swagger url](http://localhost:8080/swagger-ui/index.html)
