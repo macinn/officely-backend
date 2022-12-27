@@ -6,14 +6,16 @@ import pw.react.backend.dao.CompanyRepository;
 import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.models.Company;
 
-class CompanyMainService implements CompanyService {
+import java.util.*;
+
+public class CompanyMainService implements CompanyService {
     private final Logger logger = LoggerFactory.getLogger(CompanyMainService.class);
 
     private CompanyRepository repository;
 
     CompanyMainService() { /*Needed only for initializing spy in unit tests*/}
 
-    CompanyMainService(CompanyRepository repository) {
+    protected CompanyMainService(CompanyRepository repository) {
         this.repository = repository;
     }
 
@@ -37,5 +39,25 @@ class CompanyMainService implements CompanyService {
             result = true;
         }
         return result;
+    }
+
+    @Override
+    public Collection<Company> batchSave(Collection<Company> companies) {
+        if (companies != null && !companies.isEmpty()) {
+            return repository.saveAll(companies);
+        } else {
+            logger.warn("Companies collection is empty or null.");
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public Optional<Company> getById(long companyId) {
+        return repository.findById(companyId);
+    }
+
+    @Override
+    public Collection<Company> getAll() {
+        return repository.findAll();
     }
 }

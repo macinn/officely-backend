@@ -10,21 +10,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import pw.react.backend.dao.CompanyRepository;
 import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.exceptions.UnauthorizedException;
 import pw.react.backend.models.Company;
 import pw.react.backend.models.CompanyLogo;
-import pw.react.backend.services.CompanyService;
-import pw.react.backend.services.LogoService;
-import pw.react.backend.services.SecurityService;
+import pw.react.backend.services.*;
 import pw.react.backend.web.CompanyDto;
 import pw.react.backend.web.UploadFileResponse;
 
@@ -42,13 +36,11 @@ public class CompanyController {
 
     public static final String COMPANIES_PATH = "/companies";
 
-    private final CompanyRepository repository;
     private final SecurityService securityService;
     private final CompanyService companyService;
     private LogoService companyLogoService;
 
-    public CompanyController(CompanyRepository repository, SecurityService securityService, CompanyService companyService) {
-        this.repository = repository;
+    public CompanyController(SecurityService securityService, CompanyService companyService) {
         this.securityService = securityService;
         this.companyService = companyService;
     }
@@ -64,10 +56,10 @@ public class CompanyController {
         logHeaders(headers);
         if (securityService.isAuthorized(headers)) {
             List<Company> createdCompanies = companies.stream().map(CompanyDto::convertToCompany).collect(toList());
-            List<CompanyDto> result = repository.saveAll(createdCompanies)
+            List<CompanyDto> result = companyService.batchSave(createdCompanies)
                     .stream()
                     .map(CompanyDto::valueFrom)
-                    .collect(toList());
+                    .toList();
             return ResponseEntity.status(HttpStatus.CREATED).body(result);
         }
         throw new UnauthorizedException("Unauthorized access to resources.", COMPANIES_PATH);
@@ -86,7 +78,7 @@ public class CompanyController {
     public ResponseEntity<CompanyDto> getCompany(@RequestHeader HttpHeaders headers, @PathVariable Long companyId) {
         logHeaders(headers);
         if (securityService.isAuthorized(headers)) {
-            CompanyDto result = repository.findById(companyId)
+            CompanyDto result = companyService.getById(companyId)
                     .map(CompanyDto::valueFrom)
                     .orElseThrow(() -> new ResourceNotFoundException(String.format("Company with %d does not exist", companyId)));
             return ResponseEntity.ok(result);
@@ -98,7 +90,7 @@ public class CompanyController {
     public ResponseEntity<Collection<CompanyDto>> getAllCompanies(@RequestHeader HttpHeaders headers) {
         logHeaders(headers);
         if (securityService.isAuthorized(headers)) {
-            return ResponseEntity.ok(repository.findAll().stream().map(CompanyDto::valueFrom).collect(toList()));
+            return ResponseEntity.ok(companyService.getAll().stream().map(CompanyDto::valueFrom).toList());
         }
         throw new UnauthorizedException("Request is unauthorized", COMPANIES_PATH);
     }
