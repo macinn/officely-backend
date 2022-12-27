@@ -9,12 +9,12 @@ import pw.react.backend.services.CompanyMainService;
 import java.util.Collection;
 import java.util.Collections;
 
-class CompanyJooqService extends CompanyMainService {
-    private final Logger logger = LoggerFactory.getLogger(CompanyJooqService.class);
+class CompanyBatchService extends CompanyMainService {
+    private final Logger logger = LoggerFactory.getLogger(CompanyBatchService.class);
 
     private final BatchRepository<Company> batchRepository;
 
-    CompanyJooqService(CompanyRepository repository, BatchRepository<Company> batchRepository) {
+    CompanyBatchService(CompanyRepository repository, BatchRepository<Company> batchRepository) {
         super(repository);
         this.batchRepository = batchRepository;
     }

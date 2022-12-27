@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Table
 public class Token {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @Column(columnDefinition = "TEXT")
     private String value;

@@ -11,7 +11,6 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import pw.react.backend.batch.JooqConfig;
 import pw.react.backend.dao.CompanyLogoRepository;
-import pw.react.backend.dao.UserRepository;
 
 import java.util.*;
 
@@ -49,11 +48,6 @@ public class MainConfig {
     @Bean
     public HttpService httpService(RestTemplate restTemplate) {
         return new HttpBaseService(restTemplate);
-    }
-
-    @Bean
-    public UserService userService(UserRepository userRepository) {
-        return new UserMainService(userRepository);
     }
 
     @Bean

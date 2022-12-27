@@ -1,6 +1,7 @@
 package pw.react.backend.batch;
 
 import org.jooq.*;
+import org.jooq.conf.Settings;
 import org.jooq.impl.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -8,8 +9,6 @@ import org.springframework.context.annotation.*;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 import org.springframework.jdbc.support.SQLExceptionTranslator;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import pw.react.backend.dao.CompanyRepository;
-import pw.react.backend.services.CompanyService;
 
 import javax.sql.DataSource;
 
@@ -17,18 +16,16 @@ import javax.sql.DataSource;
 @ComponentScan({"pw.react.backend.models.backend.tables"})
 @EnableTransactionManagement
 @Profile({"batch", "mysql*"})
+@Import(BatchConfig.class)
 public class JooqConfig {
     private final DataSource dataSource;
     private final String sqlDialectName;
+    private final int batchSize;
 
-    public JooqConfig(DataSource dataSource, @Value("${spring.jooq.sql-dialect}") String sqlDialectName) {
+    public JooqConfig(DataSource dataSource, @Value("${spring.jooq.sql-dialect}") String sqlDialectName, @Value("${jooq.batchSize}") int batchSize) {
         this.dataSource = dataSource;
         this.sqlDialectName = sqlDialectName;
-    }
-
-    @Bean
-    public CompanyService companyService(CompanyRepository companyRepository, DataSourceConnectionProvider connectionProvider) {
-        return new CompanyJooqService(companyRepository, companyBatchRepository(connectionProvider));
+        this.batchSize = batchSize;
     }
 
     @Bean
@@ -47,20 +44,12 @@ public class JooqConfig {
     }
 
     @Bean
-    public DefaultConfiguration configuration() {
-        DefaultConfiguration jooqConfiguration = new DefaultConfiguration();
-        jooqConfiguration.set(connectionProvider());
-        jooqConfiguration.set(new DefaultExecuteListenerProvider(exceptionTransformer()));
-
-        SQLDialect dialect = SQLDialect.valueOf(sqlDialectName);
-        jooqConfiguration.set(dialect);
-
-        return jooqConfiguration;
-    }
-
-    @Bean
-    public CompanyBaseRepository companyBatchRepository(DataSourceConnectionProvider connectionProvider) {
-        return new CompanyBaseRepository(dsl());
+    public org.jooq.Configuration configuration() {
+        return new DefaultConfiguration()
+                .set(connectionProvider())
+                .set(new DefaultExecuteListenerProvider(exceptionTransformer()))
+                .set(SQLDialect.valueOf(sqlDialectName))
+                .set(new Settings().withBatchSize(batchSize));
     }
 
     private static class ExceptionTranslator implements ExecuteListener {
