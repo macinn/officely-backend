@@ -6,18 +6,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.*;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import pw.react.backend.batch.BatchConfig;
 import pw.react.backend.dao.CompanyLogoRepository;
+import pw.react.backend.openapi.OpenApiConfig;
+import pw.react.backend.security.configs.JwtConfig;
+import pw.react.backend.security.configs.NoWebSecurityConfig;
 
 import java.util.*;
 
 import static java.util.stream.Collectors.toSet;
 
 @Configuration
-@Import({NonBatchConfig.class, BatchConfig.class})
+@EnableWebSecurity
+@Import({NonBatchConfig.class, BatchConfig.class, JwtConfig.class, NoWebSecurityConfig.class, OpenApiConfig.class})
 public class MainConfig {
 
     private static final Logger log = LoggerFactory.getLogger(MainConfig.class);
