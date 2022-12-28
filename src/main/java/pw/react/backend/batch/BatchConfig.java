@@ -1,9 +1,8 @@
 package pw.react.backend.batch;
 
-import org.jooq.impl.DefaultDSLContext;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
+import org.springframework.jdbc.core.JdbcTemplate;
 import pw.react.backend.dao.CompanyRepository;
 import pw.react.backend.dao.UserRepository;
 import pw.react.backend.models.Company;
@@ -11,12 +10,21 @@ import pw.react.backend.models.User;
 import pw.react.backend.services.CompanyService;
 import pw.react.backend.services.UserService;
 
-class BatchConfig {
+import javax.sql.DataSource;
 
-    @Value("${jooq.batchSize}")
-    int batchSize;
-    @Autowired
-    private DefaultDSLContext dsl;
+@Profile({"batch", "mysql*"})
+public class BatchConfig {
+
+    private final DataSource dataSource;
+
+    public BatchConfig(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    @Bean
+    public JdbcTemplate jdbcTemplate() {
+        return new JdbcTemplate(dataSource);
+    }
     @Bean
     public CompanyService companyService(CompanyRepository companyRepository, BatchRepository<Company> companyBatchRepository) {
         return new CompanyBatchService(companyRepository, companyBatchRepository);
@@ -28,12 +36,12 @@ class BatchConfig {
     }
 
     @Bean
-    public CompanyBatchRepository companyBatchRepository() {
-        return new CompanyBatchRepository(dsl);
+    public CompanyBatchRepository companyBatchRepository(JdbcTemplate jdbcTemplate) {
+        return new CompanyBatchRepository(jdbcTemplate);
     }
 
     @Bean
-    public UserBatchRepository userBatchRepository(DefaultDSLContext dsl) {
-        return new UserBatchRepository(dsl);
+    public UserBatchRepository userBatchRepository(JdbcTemplate jdbcTemplate) {
+        return new UserBatchRepository(jdbcTemplate);
     }
 }

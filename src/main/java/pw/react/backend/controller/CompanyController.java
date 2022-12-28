@@ -22,8 +22,10 @@ import pw.react.backend.services.*;
 import pw.react.backend.web.CompanyDto;
 import pw.react.backend.web.UploadFileResponse;
 
-import java.util.Collection;
-import java.util.List;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -200,6 +202,26 @@ public class CompanyController {
         logHeaders(headers);
         if (securityService.isAuthorized(headers)) {
             companyLogoService.deleteCompanyLogo(Long.parseLong(companyId));
+        }
+        throw new UnauthorizedException("Unauthorized access to resources.", COMPANIES_PATH);
+    }
+
+    @PostMapping(path = "/benchmark/{size}")
+    public ResponseEntity<String> benchmark(@RequestHeader HttpHeaders headers, @PathVariable(name = "size") int size) {
+        logHeaders(headers);
+        if (securityService.isAuthorized(headers)) {
+            LocalDateTime start = LocalDateTime.now();
+            companyService.batchSave(Stream.generate(() -> {
+                Company company = new Company();
+                company.setStartDateTime(LocalDateTime.now());
+                company.setName(UUID.randomUUID().toString());
+                company.setBoardMembers(new Random().nextInt(100));
+                return company;
+            }).limit(size).toList());
+            Duration duration = Duration.between(start, LocalDateTime.now());
+            String message = String.format("Benchmark - insert %d records, took %d sec", size, duration.getSeconds());
+            log.info(message);
+            return ResponseEntity.ok(message);
         }
         throw new UnauthorizedException("Unauthorized access to resources.", COMPANIES_PATH);
     }

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import pw.react.backend.batch.JooqConfig;
+import pw.react.backend.batch.BatchConfig;
 import pw.react.backend.dao.CompanyLogoRepository;
 
 import java.util.*;
@@ -17,7 +17,7 @@ import java.util.*;
 import static java.util.stream.Collectors.toSet;
 
 @Configuration
-@Import({NonBatchConfig.class, JooqConfig.class})
+@Import({NonBatchConfig.class, BatchConfig.class})
 public class MainConfig {
 
     private static final Logger log = LoggerFactory.getLogger(MainConfig.class);

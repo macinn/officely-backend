@@ -1,52 +1,47 @@
 package pw.react.backend.batch;
 
-import org.jooq.*;
-import org.jooq.impl.DSL;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import pw.react.backend.models.Company;
 
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.*;
 import java.util.*;
 
-import static pw.react.backend.models.backend.Tables.COMPANY;
-
 class CompanyBatchRepository implements BatchRepository<Company> {
-    private final DSLContext dsl;
+    private final JdbcTemplate jdbcTemplate;
 
-    CompanyBatchRepository(DSLContext dsl) {
-        this.dsl = dsl;
+    CompanyBatchRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     @Transactional
     public Collection<Company> insertAll(Collection<Company> entities) {
-        List<Query> queries = new LinkedList<>();
-        long maxId = Optional.ofNullable(dsl.select(DSL.max(COMPANY.ID))
-                        .from(COMPANY)
-                        .fetch()
-                        .get(0))
-                .map(Record1::value1)
-                .orElseGet(() -> 0L);
-        for (Company company : entities) {
-            LocalDateTime date = Optional.ofNullable(company.getStartDateTime())
-                    .orElseGet(() -> Instant.now().atZone(ZoneId.systemDefault()).toLocalDateTime());
+        String sql = "INSERT INTO `COMPANY` (NAME, BOARD_MEMBERS, START_DATE) VALUES(?,?,?)";
 
-            queries.add(dsl.insertInto(COMPANY,
-                            COMPANY.ID,
-                            COMPANY.BOARD_MEMBERS,
-                            COMPANY.NAME,
-                            COMPANY.START_DATE
-                    ).values(
-                            ++maxId,
-                            company.getBoardMembers(),
-                            company.getName(),
-                            date
-                    )
+        for (Company company : entities) {
+            company.setStartDateTime(
+                    Optional.ofNullable(company.getStartDateTime())
+                            .orElseGet(() -> Instant.now().atZone(ZoneId.systemDefault()).toLocalDateTime())
             );
-            company.setId(maxId);
-            company.setStartDateTime(date);
         }
-        dsl.batch(queries).execute();
-        return entities;
+        final var companies = new ArrayList<>(entities);
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                Company company = companies.get(i);
+                ps.setString(1, company.getName());
+                ps.setInt(2, company.getBoardMembers());
+                ps.setDate(3, new java.sql.Date(ZonedDateTime.of(company.getStartDateTime(), ZoneId.systemDefault()).toInstant().toEpochMilli()));
+            }
+            @Override
+            public int getBatchSize() {
+                return companies.size();
+            }
+        });
+        return companies;
     }
 }
