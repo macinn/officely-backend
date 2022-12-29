@@ -12,12 +12,9 @@ public class NoWebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests((authz) -> authz
-                        .anyRequest().authenticated()
-                )
-                .httpBasic(withDefaults());
-        return http.build();
+        return http.authorizeHttpRequests((auth) -> auth.anyRequest().authenticated())
+                .httpBasic(withDefaults())
+                .build();
     }
 
 }

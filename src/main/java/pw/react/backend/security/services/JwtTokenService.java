@@ -68,7 +68,7 @@ public class JwtTokenService implements Serializable {
                 .getBody();
     }
 
-    private Boolean isTokenExpired(String token) {
+    private Boolean hasTokenExpired(String token) {
         final Date expiration = getExpirationDateFromToken(token);
         return expiration.before(new Date());
     }
@@ -119,20 +119,19 @@ public class JwtTokenService implements Serializable {
     }
 
     public Boolean validateToken(String token, UserDetails userDetails, HttpServletRequest request) {
-        Optional<Token> tokenOpt = tokenRepository.findByValue(token);
-        final String username = getUsernameFromToken(token);
-        return username.equals(userDetails.getUsername()) &&
-                !isTokenExpired(token) &&
-                isClientIpCorrect(token, request) &&
+        boolean isValidToken = tokenRepository.findByValue(token).isEmpty();
+        return getUsernameFromToken(token).equals(userDetails.getUsername()) &&
+                !hasTokenExpired(token) &&
+                isValidClientIp(token, request) &&
                 isValidUserAgent(token, request) &&
-                tokenOpt.isEmpty();
+                isValidToken;
     }
 
     private boolean isValidUserAgent(String token, HttpServletRequest request) {
         return getUserAgent(request).equals(getUserAgentFromToken(token));
     }
 
-    private boolean isClientIpCorrect(String token, HttpServletRequest request) {
+    private boolean isValidClientIp(String token, HttpServletRequest request) {
         return getClientIp(request).equals(getClientIpFromToken(token));
     }
 
