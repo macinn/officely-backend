@@ -13,8 +13,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import pw.react.backend.batch.BatchConfig;
 import pw.react.backend.dao.CompanyLogoRepository;
 import pw.react.backend.openapi.OpenApiConfig;
-import pw.react.backend.security.configs.JwtConfig;
-import pw.react.backend.security.configs.NoWebSecurityConfig;
+import pw.react.backend.security.basic.BasicAuthenticationConfig;
+import pw.react.backend.security.jwt.services.JwtConfig;
 
 import java.util.*;
 
@@ -22,7 +22,9 @@ import static java.util.stream.Collectors.toSet;
 
 @Configuration
 @EnableWebSecurity
-@Import({NonBatchConfig.class, BatchConfig.class, JwtConfig.class, NoWebSecurityConfig.class, OpenApiConfig.class})
+@Import({
+        NonBatchConfig.class, BatchConfig.class, JwtConfig.class, OpenApiConfig.class, BasicAuthenticationConfig.class
+})
 public class MainConfig {
 
     private static final Logger log = LoggerFactory.getLogger(MainConfig.class);

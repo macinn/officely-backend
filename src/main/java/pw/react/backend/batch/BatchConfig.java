@@ -3,6 +3,7 @@ package pw.react.backend.batch;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import pw.react.backend.dao.CompanyRepository;
 import pw.react.backend.dao.UserRepository;
 import pw.react.backend.models.Company;
@@ -31,8 +32,8 @@ public class BatchConfig {
     }
 
     @Bean
-    public UserService userService(UserRepository userRepository, BatchRepository<User> userBatchRepository) {
-        return new UserBatchService(userRepository, userBatchRepository);
+    public UserService userService(UserRepository userRepository, PasswordEncoder passwordEncoder, BatchRepository<User> userBatchRepository) {
+        return new UserBatchService(userRepository, passwordEncoder, userBatchRepository);
     }
 
     @Bean

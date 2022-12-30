@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
-import pw.react.backend.security.controllers.JwtAuthenticationController;
+import pw.react.backend.security.jwt.controllers.JwtAuthenticationController;
 
 @ControllerAdvice(annotations = RestController.class)
 public class ControllerExceptionHelper {

@@ -1,17 +1,15 @@
-package pw.react.backend.security.services;
+package pw.react.backend.security.common;
 
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.*;
 import pw.react.backend.dao.UserRepository;
 
 import java.util.Optional;
 
-public class JwtUserDetailsService implements UserDetailsService {
+public class CommonUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-    public JwtUserDetailsService(UserRepository userRepository) {
+    public CommonUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 

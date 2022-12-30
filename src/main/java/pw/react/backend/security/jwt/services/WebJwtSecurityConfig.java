@@ -1,4 +1,4 @@
-package pw.react.backend.security.configs;
+package pw.react.backend.security.jwt.services;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
@@ -11,6 +11,8 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
+import pw.react.backend.security.common.AuthenticationService;
+import pw.react.backend.security.common.CommonAuthenticationService;
 
 @Profile({"jwt"})
 public class WebJwtSecurityConfig {
@@ -22,6 +24,11 @@ public class WebJwtSecurityConfig {
                                 OncePerRequestFilter jwtRequestFilter) {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
         this.jwtRequestFilter = jwtRequestFilter;
+    }
+
+    @Bean
+    public AuthenticationService securityService(AuthenticationManager authenticationManager) {
+        return new CommonAuthenticationService(authenticationManager);
     }
 
     @Bean

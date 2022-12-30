@@ -1,4 +1,4 @@
-package pw.react.backend.security.filters;
+package pw.react.backend.security.jwt.filters;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -12,8 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
-import pw.react.backend.security.services.JwtTokenService;
-import pw.react.backend.security.services.JwtUserDetailsService;
+import pw.react.backend.security.common.CommonUserDetailsService;
+import pw.react.backend.security.jwt.services.JwtTokenService;
 
 import java.io.IOException;
 
@@ -24,11 +24,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER = "Bearer ";
 
-    private final JwtUserDetailsService jwtUserDetailsService;
+    private final CommonUserDetailsService commonUserDetailsService;
     private final JwtTokenService jwtTokenService;
 
-    public JwtRequestFilter(JwtUserDetailsService jwtUserDetailsService, JwtTokenService jwtTokenService) {
-        this.jwtUserDetailsService = jwtUserDetailsService;
+    public JwtRequestFilter(CommonUserDetailsService commonUserDetailsService, JwtTokenService jwtTokenService) {
+        this.commonUserDetailsService = commonUserDetailsService;
         this.jwtTokenService = jwtTokenService;
     }
 
@@ -59,7 +59,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         // Once we get the token validate it.
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(username);
+            UserDetails userDetails = commonUserDetailsService.loadUserByUsername(username);
 
             // if token is valid configure Spring Security to manually set authentication
             if (jwtTokenService.validateToken(jwtToken, userDetails, request)) {

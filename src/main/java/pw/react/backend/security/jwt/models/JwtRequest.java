@@ -1,4 +1,4 @@
-package pw.react.backend.security.models;
+package pw.react.backend.security.jwt.models;
 
 import jakarta.validation.constraints.NotEmpty;
 

@@ -1,4 +1,4 @@
-package pw.react.backend.security.models;
+package pw.react.backend.security.jwt.models;
 
 import java.io.Serial;
 import java.io.Serializable;

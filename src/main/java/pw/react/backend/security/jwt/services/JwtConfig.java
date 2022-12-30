@@ -1,4 +1,4 @@
-package pw.react.backend.security.configs;
+package pw.react.backend.security.jwt.services;
 
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -11,10 +11,9 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.filter.OncePerRequestFilter;
 import pw.react.backend.dao.TokenRepository;
 import pw.react.backend.dao.UserRepository;
-import pw.react.backend.security.filters.JwtAuthenticationEntryPoint;
-import pw.react.backend.security.filters.JwtRequestFilter;
-import pw.react.backend.security.services.JwtTokenService;
-import pw.react.backend.security.services.JwtUserDetailsService;
+import pw.react.backend.security.common.CommonUserDetailsService;
+import pw.react.backend.security.jwt.filters.JwtAuthenticationEntryPoint;
+import pw.react.backend.security.jwt.filters.JwtRequestFilter;
 
 @ConfigurationProperties(prefix = "jwt")
 @Profile("jwt")
@@ -34,8 +33,8 @@ public class JwtConfig {
     }
 
     @Bean
-    public JwtUserDetailsService jwtUserDetailsService(UserRepository userRepository) {
-        return new JwtUserDetailsService(userRepository);
+    public CommonUserDetailsService userDetailsService(UserRepository userRepository) {
+        return new CommonUserDetailsService(userRepository);
     }
 
     @Bean
@@ -49,8 +48,8 @@ public class JwtConfig {
     }
 
     @Bean
-    public OncePerRequestFilter jwtRequestFilter(UserRepository userRepository, TokenRepository tokenRepository) {
-        return new JwtRequestFilter(jwtUserDetailsService(userRepository), jwtTokenService(tokenRepository));
+    public OncePerRequestFilter jwtRequestFilter(CommonUserDetailsService commonUserDetailsService, JwtTokenService jwtTokenService) {
+        return new JwtRequestFilter(commonUserDetailsService, jwtTokenService);
     }
 
     @Bean

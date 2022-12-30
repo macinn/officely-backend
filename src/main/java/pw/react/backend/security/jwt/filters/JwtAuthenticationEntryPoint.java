@@ -1,4 +1,4 @@
-package pw.react.backend.security.filters;
+package pw.react.backend.security.jwt.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;

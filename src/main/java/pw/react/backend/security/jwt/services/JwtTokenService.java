@@ -1,4 +1,4 @@
-package pw.react.backend.security.services;
+package pw.react.backend.security.jwt.services;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
