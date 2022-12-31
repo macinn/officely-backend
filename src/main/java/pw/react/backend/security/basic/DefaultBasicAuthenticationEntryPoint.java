@@ -21,7 +21,7 @@ public class DefaultBasicAuthenticationEntryPoint extends BasicAuthenticationEnt
 
     @Override
     public void afterPropertiesSet() {
-        setRealmName("Baeldung");
+        setRealmName("backend-starter");
         super.afterPropertiesSet();
     }
 }
