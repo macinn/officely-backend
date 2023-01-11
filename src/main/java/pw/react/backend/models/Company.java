@@ -1,6 +1,7 @@
 package pw.react.backend.models;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -13,7 +14,7 @@ public class Company implements Serializable {
     private static final long serialVersionUID = -6783504532088859179L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @Column
     private String name;

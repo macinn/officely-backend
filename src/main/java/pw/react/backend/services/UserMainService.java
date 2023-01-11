@@ -7,21 +7,17 @@ import pw.react.backend.dao.UserRepository;
 import pw.react.backend.exceptions.UserValidationException;
 import pw.react.backend.models.User;
 
-import java.util.Optional;
+import java.util.*;
 
 public class UserMainService implements UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserMainService.class);
 
     private final UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
+    protected final PasswordEncoder passwordEncoder;
 
-    public UserMainService(UserRepository userRepository) {
+    public UserMainService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-    }
-
-    @Override
-    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -33,6 +29,7 @@ public class UserMainService implements UserService {
             if (dbUser.isPresent()) {
                 log.info("User already exists. Updating it.");
                 user.setId(dbUser.get().getId());
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
             }
             user = userRepository.save(user);
             log.info("User was saved.");
@@ -42,15 +39,15 @@ public class UserMainService implements UserService {
 
     private boolean isValidUser(User user) {
         if (user != null) {
-            if (!isValid(user.getUsername())) {
+            if (isValid(user.getUsername())) {
                 log.error("Empty username.");
                 throw new UserValidationException("Empty username.");
             }
-            if (!isValid(user.getPassword())) {
+            if (isValid(user.getPassword())) {
                 log.error("Empty user password.");
                 throw new UserValidationException("Empty user password.");
             }
-            if (!isValid(user.getEmail())) {
+            if (isValid(user.getEmail())) {
                 log.error("UEmpty email.");
                 throw new UserValidationException("Empty email.");
             }
@@ -61,7 +58,7 @@ public class UserMainService implements UserService {
     }
 
     private boolean isValid(String value) {
-        return value != null && !value.isBlank();
+        return value == null || value.isBlank();
     }
 
     @Override
@@ -77,5 +74,19 @@ public class UserMainService implements UserService {
             user = userRepository.save(user);
         }
         return user;
+    }
+
+    @Override
+    public Collection<User> batchSave(Collection<User> users) {
+        if (users != null && !users.isEmpty()) {
+            for (User user : users) {
+                isValidUser(user);
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
+            }
+            return userRepository.saveAll(users);
+        } else {
+            log.warn("User collection is empty or null.");
+            return Collections.emptyList();
+        }
     }
 }

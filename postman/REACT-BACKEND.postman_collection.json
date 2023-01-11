@@ -6,7 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "authenticate",
+			"name": "login",
 			"event": [
 				{
 					"listen": "test",
@@ -35,13 +35,92 @@
 					}
 				},
 				"url": {
-					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/authenticate",
+					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/auth/login",
 					"protocol": "{{PROTOCOL}}",
 					"host": [
 						"{{DOMAIN_URL}}"
 					],
 					"path": [
-						"authenticate"
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logout",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.globals.set(\"JWT_TOKEN\", null);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/auth/logout",
+					"protocol": "{{PROTOCOL}}",
+					"host": [
+						"{{DOMAIN_URL}}"
+					],
+					"path": [
+						"auth",
+						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "remove tokens",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = pm.response.json();\r",
+							"pm.globals.set(\"JWT_TOKEN\", jsonData.jwttoken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\" : \"pawg\",\r\n    \"password\" : \"pw2021\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/auth",
+					"protocol": "{{PROTOCOL}}",
+					"host": [
+						"{{DOMAIN_URL}}"
+					],
+					"path": [
+						"auth"
 					]
 				}
 			},
@@ -53,13 +132,13 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/{{COMPANIES_PATH}}",
+					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/companies",
 					"protocol": "{{PROTOCOL}}",
 					"host": [
 						"{{DOMAIN_URL}}"
 					],
 					"path": [
-						"{{COMPANIES_PATH}}"
+						"companies"
 					]
 				}
 			},
@@ -86,13 +165,13 @@
 					}
 				},
 				"url": {
-					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/{{COMPANIES_PATH}}",
+					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/companies",
 					"protocol": "{{PROTOCOL}}",
 					"host": [
 						"{{DOMAIN_URL}}"
 					],
 					"path": [
-						"{{COMPANIES_PATH}}"
+						"companies"
 					]
 				}
 			},
@@ -119,33 +198,14 @@
 					}
 				},
 				"url": {
-					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/{{COMPANIES_PATH}}/1",
+					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/companies/1",
 					"protocol": "{{PROTOCOL}}",
 					"host": [
 						"{{DOMAIN_URL}}"
 					],
 					"path": [
-						"{{COMPANIES_PATH}}",
+						"companies",
 						"1"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "actuator",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/actuator/health",
-					"protocol": "{{PROTOCOL}}",
-					"host": [
-						"{{DOMAIN_URL}}"
-					],
-					"path": [
-						"actuator",
-						"health"
 					]
 				}
 			},
@@ -214,6 +274,45 @@
 					"path": [
 						"actuator",
 						"beans"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "profiles",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/actuator/env/spring.profiles.active",
+					"protocol": "{{PROTOCOL}}",
+					"host": [
+						"{{DOMAIN_URL}}"
+					],
+					"path": [
+						"actuator",
+						"env",
+						"spring.profiles.active"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "health",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{PROTOCOL}}://{{DOMAIN_URL}}/actuator/health",
+					"protocol": "{{PROTOCOL}}",
+					"host": [
+						"{{DOMAIN_URL}}"
+					],
+					"path": [
+						"actuator",
+						"health"
 					]
 				}
 			},

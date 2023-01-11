@@ -1,5 +1,6 @@
-package pw.react.backend.security.configs;
+package pw.react.backend.security.jwt.services;
 
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -8,17 +9,15 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.filter.OncePerRequestFilter;
+import pw.react.backend.dao.TokenRepository;
 import pw.react.backend.dao.UserRepository;
-import pw.react.backend.security.filters.JwtAuthenticationEntryPoint;
-import pw.react.backend.security.filters.JwtRequestFilter;
-import pw.react.backend.security.services.JwtTokenService;
-import pw.react.backend.security.services.JwtUserDetailsService;
+import pw.react.backend.security.common.CommonUserDetailsService;
+import pw.react.backend.security.jwt.filters.JwtAuthenticationEntryPoint;
+import pw.react.backend.security.jwt.filters.JwtRequestFilter;
 
-import javax.annotation.PostConstruct;
-
-@Configuration
 @ConfigurationProperties(prefix = "jwt")
 @Profile("jwt")
+@Import(WebJwtSecurityConfig.class)
 public class JwtConfig {
 
     private static final Logger log = LoggerFactory.getLogger(JwtConfig.class);
@@ -33,10 +32,9 @@ public class JwtConfig {
         log.debug("JWT expirationMs: {}", expirationMs);
     }
 
-
     @Bean
-    public JwtUserDetailsService jwtUserDetailsService(UserRepository userRepository) {
-        return new JwtUserDetailsService(userRepository);
+    public CommonUserDetailsService userDetailsService(UserRepository userRepository) {
+        return new CommonUserDetailsService(userRepository);
     }
 
     @Bean
@@ -45,13 +43,13 @@ public class JwtConfig {
     }
 
     @Bean
-    public JwtTokenService jwtTokenService() {
-        return new JwtTokenService(secret, expirationMs);
+    public JwtTokenService jwtTokenService(TokenRepository tokenRepository) {
+        return new JwtTokenService(secret, expirationMs, tokenRepository);
     }
 
     @Bean
-    public OncePerRequestFilter jwtRequestFilter(UserRepository userRepository) {
-        return new JwtRequestFilter(jwtUserDetailsService(userRepository), jwtTokenService());
+    public OncePerRequestFilter jwtRequestFilter(CommonUserDetailsService commonUserDetailsService, JwtTokenService jwtTokenService) {
+        return new JwtRequestFilter(commonUserDetailsService, jwtTokenService);
     }
 
     @Bean

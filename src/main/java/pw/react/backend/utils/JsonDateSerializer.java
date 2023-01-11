@@ -5,16 +5,15 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 
-public class JsonDateSerializer extends JsonSerializer {
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+public class JsonDateSerializer extends JsonSerializer<LocalDateTime> {
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.Z");
 
     @Override
-    public void serialize(Object o, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        final LocalDateTime date = (LocalDateTime) o;
-        final String dateString = date.format(this.formatter);
+    public void serialize(LocalDateTime localDateTime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+        final String dateString = ZonedDateTime.of(localDateTime, ZoneId.systemDefault()).format(formatter);
         jsonGenerator.writeString(dateString);
     }
 }
