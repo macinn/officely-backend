@@ -24,10 +24,12 @@ public class UserBatchService extends UserMainService {
     public Collection<User> batchSave(Collection<User> users) {
         log.info("Batch insert.");
         if (users != null && !users.isEmpty()) {
-            return batchRepository.insertAll(users.stream()
+            Collection<User> insertedUsers = batchRepository.insertAll(users.stream()
                     .peek(it -> it.setPassword(passwordEncoder.encode(it.getPassword())))
                     .toList()
             );
+            return userRepository.findAllByUsernameIn(insertedUsers.stream().map(User::getUsername).toList());
+
         } else {
             log.warn("User collection is empty or null.");
             return Collections.emptyList();

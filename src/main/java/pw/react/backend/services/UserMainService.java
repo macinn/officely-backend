@@ -13,7 +13,7 @@ public class UserMainService implements UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserMainService.class);
 
-    private final UserRepository userRepository;
+    protected final UserRepository userRepository;
     protected final PasswordEncoder passwordEncoder;
 
     public UserMainService(UserRepository userRepository, PasswordEncoder passwordEncoder) {

@@ -45,7 +45,9 @@ public class ControllerExceptionHelper {
     @ExceptionHandler(value = { UserValidationException.class })
     public ResponseEntity<ExceptionDetails> UserValidationException(UserValidationException ex) {
         log.error("User Validation Exception: {}", ex.getMessage());
-        return new ResponseEntity<>(new ExceptionDetails(HttpStatus.BAD_REQUEST, ex.getMessage()), HttpStatus.BAD_REQUEST);
+        ExceptionDetails exceptionDetails = new ExceptionDetails(HttpStatus.BAD_REQUEST, ex.getMessage());
+        exceptionDetails.setPath(ex.getResourcePath());
+        return new ResponseEntity<>(exceptionDetails, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(value = { UsernameNotFoundException.class })

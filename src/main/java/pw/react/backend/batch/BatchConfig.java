@@ -13,7 +13,7 @@ import pw.react.backend.services.UserService;
 
 import javax.sql.DataSource;
 
-@Profile({"batch", "mysql*"})
+@Profile({"batch", "*mysql*"})
 public class BatchConfig {
 
     private final DataSource dataSource;
