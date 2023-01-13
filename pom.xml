@@ -11,7 +11,7 @@
 	<groupId>pw.react</groupId>
 	<artifactId>pw-backend-starter</artifactId>
 	<version>1.0.0</version>
-	<name>react-backend</name>
+	<name>backend-starter</name>
 	<description>Starter for the labs</description>
 
 	<properties>
