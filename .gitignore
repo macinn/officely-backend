@@ -1,6 +1,7 @@
 target/
 logs/
 helps/
+docker/*.jar
 
 .mvn/
 mvnw
