@@ -4,4 +4,4 @@ then
   rm ./*.jar
 fi;
 
-cp ../target/*.jar docker/
+cp ../target/*.jar .
