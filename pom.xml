@@ -147,8 +147,9 @@
 						-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005
 					</jvmArguments>-->
 					<profiles>
-						<profile>mysql-dev</profile>
+						<profile>mysql</profile>
 						<profile>jwt</profile>
+						<profile>batch</profile>
 					</profiles>
 				</configuration>
 			</plugin>
