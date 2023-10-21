@@ -7,6 +7,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,7 +17,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
 import pw.react.backend.dao.UserRepository;
-import pw.react.backend.security.common.*;
+import pw.react.backend.security.common.AuthenticationService;
+import pw.react.backend.security.common.CommonAuthenticationService;
+import pw.react.backend.security.common.CommonUserDetailsService;
 
 @Profile({"!jwt"})
 public class BasicAuthenticationConfig {
@@ -57,11 +60,11 @@ public class BasicAuthenticationConfig {
                                            OncePerRequestFilter basicAuthenticationRequestFilter
     ) throws Exception {
         return httpSecurity
-                .cors().disable()
-                .csrf().disable()
-                .exceptionHandling().authenticationEntryPoint(authenticationEntryPoint).and()
+                .cors(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable)
+                .exceptionHandling(exceptionHandlingConfigurer -> exceptionHandlingConfigurer.authenticationEntryPoint(authenticationEntryPoint))
                 // make sure we use stateless session; session won't be used to store user's state.
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
