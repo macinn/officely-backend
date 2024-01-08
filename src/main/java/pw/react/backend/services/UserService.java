@@ -8,4 +8,5 @@ public interface UserService {
     User validateAndSave(User user);
     User updatePassword(User user, String password);
     Collection<User> batchSave(Collection<User> users);
+    public Collection<User> getUsersWithIdGreaterThan1(int pageSize, int pageNum);
 }

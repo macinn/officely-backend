@@ -2,6 +2,9 @@ package pw.react.backend.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pw.react.backend.dao.UserRepository;
 import pw.react.backend.exceptions.UserValidationException;
@@ -88,5 +91,10 @@ public class UserMainService implements UserService {
             log.warn("User collection is empty or null.");
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public Collection<User> getUsersWithIdGreaterThan1(int pageSize, int pageNum) {
+        return userRepository.findByIdGreaterThan(1L, PageRequest.of(pageNum, pageSize));
     }
 }

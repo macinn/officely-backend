@@ -55,4 +55,19 @@ public class UserController {
             throw new UserValidationException(ex.getMessage(), USERS_PATH);
         }
     }
+
+    @GetMapping(path = "")
+    public ResponseEntity<Collection<UserDto>> getGreaterId(@RequestParam("pageSize") int pageSize,
+                                                            @RequestParam("pageNum") int pageNum) {
+        try {
+            Collection<UserDto> newUsers = userService.getUsersWithIdGreaterThan1(pageSize,pageNum)
+                            .stream()
+                    .map(UserDto::valueFrom)
+                    .toList();
+            log.info("Password is not going to be encoded");
+            return ResponseEntity.status(HttpStatus.CREATED).body(newUsers);
+        } catch (Exception ex) {
+            throw new UserValidationException(ex.getMessage(), USERS_PATH);
+        }
+    }
 }
