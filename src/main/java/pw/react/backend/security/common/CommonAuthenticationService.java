@@ -1,6 +1,9 @@
 package pw.react.backend.security.common;
 
-import org.springframework.security.authentication.*;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 public class CommonAuthenticationService implements AuthenticationService {
     private final AuthenticationManager authenticationManager;

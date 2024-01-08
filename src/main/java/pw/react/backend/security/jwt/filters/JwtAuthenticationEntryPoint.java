@@ -11,7 +11,9 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.util.MimeTypeUtils;
 import pw.react.backend.exceptions.ExceptionDetails;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Serializable {

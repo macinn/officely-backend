@@ -6,7 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestController;
 import pw.react.backend.security.jwt.controllers.JwtAuthenticationController;
 
 @ControllerAdvice(annotations = RestController.class)
@@ -14,7 +16,7 @@ public class ControllerExceptionHelper {
 
     private static final Logger log = LoggerFactory.getLogger(ControllerExceptionHelper.class);
 
-    @ExceptionHandler(value = { InvalidFileException.class })
+        @ExceptionHandler(value = { InvalidFileException.class })
     public ResponseEntity<ExceptionDetails> handleNotFound(InvalidFileException ex) {
         log.error("Invalid Input Exception: {}", ex.getMessage());
         return new ResponseEntity<>(new ExceptionDetails(HttpStatus.NOT_FOUND, ex.getMessage()), HttpStatus.NOT_FOUND);

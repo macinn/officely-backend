@@ -1,6 +1,8 @@
 package pw.react.backend.security.common;
 
-import org.springframework.security.core.userdetails.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import pw.react.backend.dao.UserRepository;
 
 import java.util.Optional;

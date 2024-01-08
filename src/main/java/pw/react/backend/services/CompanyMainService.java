@@ -6,7 +6,9 @@ import pw.react.backend.dao.CompanyRepository;
 import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.models.Company;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 
 public class CompanyMainService implements CompanyService {
     private final Logger logger = LoggerFactory.getLogger(CompanyMainService.class);
