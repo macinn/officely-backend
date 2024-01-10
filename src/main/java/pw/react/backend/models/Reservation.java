@@ -42,4 +42,24 @@ public class Reservation implements Serializable {
     public LocalDateTime getEndDateTime() {
         return endDateTime;
     }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
+
+    public void setOfficeId(long officeId) {
+        this.officeId = officeId;
+    }
+
+    public void setStartDateTime(LocalDateTime startDateTime) {
+        this.startDateTime = startDateTime;
+    }
+
+    public void setEndDateTime(LocalDateTime endDateTime) {
+        this.endDateTime = endDateTime;
+    }
 }

@@ -55,7 +55,6 @@ public class UserController {
             throw new UserValidationException(ex.getMessage(), USERS_PATH);
         }
     }
-
     @GetMapping(path = "")
     public ResponseEntity<Collection<UserDto>> getGreaterId(@RequestParam("pageSize") int pageSize,
                                                             @RequestParam("pageNum") int pageNum) {
