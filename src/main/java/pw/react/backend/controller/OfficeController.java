@@ -1,46 +1,88 @@
 package pw.react.backend.controller;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.maps.GeoApiContext;
+import com.google.maps.GeocodingApi;
+import com.google.maps.model.GeocodingResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pw.react.backend.exceptions.OfficeValidationException;
 import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.models.Office;
+import pw.react.backend.models.OfficePhoto;
 import pw.react.backend.services.OfficeService;
+import pw.react.backend.services.PhotoService;
 import pw.react.backend.web.OfficeDto;
+import pw.react.backend.web.UploadFileResponse;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
+// TODO: Save service
 @RestController
 @RequestMapping(path = OfficeController.OFFICES_PATH)
 public class OfficeController {
     private static final Logger log = LoggerFactory.getLogger(OfficeController.class);
     static final String OFFICES_PATH = "/offices";
     private final OfficeService officeService;
-    public OfficeController(OfficeService officeService) {
+    private PhotoService officePhotoService;
+    private GeoApiContext geoApiContext;
+
+    public OfficeController(OfficeService officeService, PhotoService officePhotoService) {
         this.officeService = officeService;
+        // TODO: Move to config, fully remove
+        this.geoApiContext = new GeoApiContext.Builder()
+                .apiKey("AIzaSyD6qGi4RXb_I2uZtIHsoHNpNjSvPIJwGfE")
+                .build();
+    }
+
+    @Autowired
+    public void setOfficePhotoService(PhotoService officePhotoService) {
+        this.officePhotoService = officePhotoService;
     }
 
     @GetMapping(path = "")
-    public ResponseEntity<Collection<OfficeDto>> getAll(@RequestParam("pageSize") int pageSize,
-                                                            @RequestParam("pageNum") int pageNum) {
+    public ResponseEntity<Collection<OfficeDto>> getOffices(
+            @RequestParam(required = true, name = "pageSize") int pageSize,
+            @RequestParam(required = true, name = "pageNum") int pageNum,
+            @RequestParam(required = true, name = "location") String location,
+            @RequestParam(required = false, name = "name") Optional<String> name,
+            @RequestParam(required = false, name = "minPrice") Optional<Integer> minPrice,
+            @RequestParam(required = false, name = "maxPrice") Optional<Integer> maxPrice,
+            @RequestParam(required = false, name = "amenities") Optional<String[]> amenities,
+            @RequestParam(required = false, name = "officeType") Optional<String> officeType,
+            @RequestParam(required = false, name = "minRating") Optional<Integer> minRating,
+            @RequestParam(required = false, name = "minArea") Optional<Integer> minArea,
+            @RequestParam(required = false, name = "sort") String sort
+    ) {
         try {
-            // TODO: Paging, sorting, filtering
-            Collection<OfficeDto> newOffices = officeService.getAll()
+            Collection<OfficeDto> newOffices = officeService.getAll(pageSize, pageNum, location, name, minPrice, maxPrice, amenities, officeType, minRating, minArea, sort)
                     .stream()
                     .map(OfficeDto::valueFrom)
                     .toList();
-            log.info("Password is not going to be encoded");
             return ResponseEntity.status(HttpStatus.CREATED).body(newOffices);
         } catch (Exception ex) {
             throw new OfficeValidationException(ex.getMessage(), OFFICES_PATH);
         }
     }
+
     @PostMapping(path = "")
     public ResponseEntity<Collection<OfficeDto>> createOffices(@RequestBody Collection<OfficeDto> offices) {
         try {
@@ -77,6 +119,137 @@ public class OfficeController {
             return ResponseEntity.badRequest().body(String.format("Office with id %s does not exists.", officeId));
         }
         return ResponseEntity.ok(String.format("Office with id %s deleted.", officeId));
+    }
+
+//    @PostMapping("/address")
+//    public void getAddress() {
+//        try {
+//            GeocodingResult[] results =  GeocodingApi.geocode(geoApiContext,
+//                    "Domaniewska 34b").await();
+//            System.out.println(results[0].geometry.location.lat);
+//            System.out.println(results[0].geometry.location.lng);
+//            System.out.println(results[0].formattedAddress);
+//        } catch (Exception ex) {
+//            throw new OfficeValidationException(ex.getMessage(), OFFICES_PATH);
+//        }
+//    }
+
+    // Photos
+    @GetMapping(value = "/{officeId}/thumbnail", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public @ResponseBody byte[] getThumbnail(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
+
+        Optional<Office> office = officeService.getById(officeId);
+        if(office.isPresent()) {
+            String thumbnailId = office.get().getOfficePhotoThumbnailId();
+            Optional<OfficePhoto> officeThumbnail = officePhotoService.getPhoto(thumbnailId);
+            return officeThumbnail.map(OfficePhoto::getData).orElseGet(() -> new byte[0]);
+        }
+        else
+            throw new ResourceNotFoundException(String.format("Office with %d does not exist", officeId));
+    }
+
+    @PostMapping("/{officeId}/thumbnail")
+    public ResponseEntity<UploadFileResponse> uploadThumbnail(@RequestHeader HttpHeaders headers,
+                                                          @PathVariable Long officeId,
+                                                          @RequestParam("file") MultipartFile file) {
+        OfficePhoto officePhoto = officePhotoService.storePhoto(officeId, file);
+        Optional<Office> office = officeService.getById(officeId);
+
+        if(office.isPresent()) {
+            office.get().setOfficePhotoThumbnailId(officePhoto.getId());
+            officeService.updateOffice(officeId, office.get());
+            String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/companies/" + officeId + "/logo/")
+                    .path(officePhoto.getFileName())
+                    .toUriString();
+            UploadFileResponse response = new UploadFileResponse(
+                    officePhoto.getFileName(),
+                    fileDownloadUri,
+                    file.getContentType(),
+                    file.getSize()
+            );
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+    }
+
+    @GetMapping(value = "/{officeId}/photos", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public @ResponseBody byte[][] getPhotos(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
+        Optional<OfficePhoto[]> officePhotos = officePhotoService.getOfficePhotos(officeId);
+        return officePhotos.map(photos -> Arrays.stream(photos).map(OfficePhoto::getData).toArray(byte[][]::new)).orElseGet(() -> new byte[0][]);
+
+    }
+
+    @PostMapping("/{officeId}/photos")
+    public ResponseEntity<UploadFileResponse> uploadPhoto(@RequestHeader HttpHeaders headers,
+                                                         @PathVariable Long officeId,
+                                                         @RequestParam("file") MultipartFile file) {
+        OfficePhoto officePhoto = officePhotoService.storePhoto(officeId, file);
+
+        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/companies/" + officeId + "/logo/")
+                .path(officePhoto.getFileName())
+                .toUriString();
+        UploadFileResponse response = new UploadFileResponse(
+                officePhoto.getFileName(),
+                fileDownloadUri,
+                file.getContentType(),
+                file.getSize()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+//    @Operation(summary = "Get logo for company")
+//    @ApiResponses(value = {
+//            @ApiResponse(
+//                    responseCode = "200",
+//                    description = "Get log by company id",
+//                    content = {@Content(mediaType = "application/json")}
+//            ),
+//            @ApiResponse(
+//                    responseCode = "401",
+//                    description = "Unauthorized operation",
+//                    content = {@Content(mediaType = "application/json")}
+//            )
+//    })
+//    @GetMapping(value = "/{officeId}/photos2")
+//    public ResponseEntity<Resource> getLogo2(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
+//        OfficePhoto companyLogo = officePhotoService.getOfficePhoto(officeId);
+//        return ResponseEntity.ok()
+//                .contentType(MediaType.parseMediaType(companyLogo.getFileType()))
+//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + companyLogo.getFileName() + "\"")
+//                .body(new ByteArrayResource(companyLogo.getData()));
+//    }
+
+    @Operation(summary = "Delete photos for given company")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Logo deleted",
+                    content = {@Content(mediaType = "application/json")}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized operation",
+                    content = {@Content(mediaType = "application/json")}
+            )
+    })
+    @DeleteMapping(value = "/{officeId}/photos")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removePhotos    (@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
+        officePhotoService.deleteOfficePhotos(officeId);
+    }
+
+    // Fetch available data
+    @Operation(summary = "Fetch available amenities")
+    @GetMapping(value = "/amenities/")
+    public @ResponseBody String[] getAmenities(@RequestHeader HttpHeaders headers) {
+        return Arrays.stream(Office.Amenities.values()).map(Enum::name).toArray(String[]::new);
+    }
+    @Operation(summary = "Fetch available office types")
+    @GetMapping(value = "/office-types/")
+    public @ResponseBody String[] getOfficeTypes(@RequestHeader HttpHeaders headers) {
+        return Arrays.stream(Office.OfficeType.values()).map(Enum::name).toArray(String[]::new);
     }
 
 }

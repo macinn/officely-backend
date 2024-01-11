@@ -16,6 +16,7 @@ import pw.react.backend.web.ReservationDto;
 import pw.react.backend.web.UserDto;
 
 import java.util.Collection;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(path = ReservationController.RESERVATIONS_PATH)
@@ -27,11 +28,15 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
     @GetMapping(path = "")
-    public ResponseEntity<Collection<ReservationDto>> getAll(@RequestParam("pageSize") int pageSize,
-                                                        @RequestParam("pageNum") int pageNum) {
+    public ResponseEntity<Collection<ReservationDto>> getAll(
+            @RequestParam("pageSize") int pageSize,
+            @RequestParam("pageNum") int pageNum,
+            @RequestParam(required = false, name = "userId") Optional<Integer> userId,
+            @RequestParam(required = false, name = "officeId") Optional<Integer> officeId
+    ) {
         try {
             // TODO: Paging, sorting, filtering
-            Collection<ReservationDto> newReservations = reservationService.getAll()
+            Collection<ReservationDto> newReservations = reservationService.getAll(pageSize, pageNum, userId, officeId)
                     .stream()
                     .map(ReservationDto::valueFrom)
                     .toList();
@@ -56,7 +61,7 @@ public class ReservationController {
     }
 
     @GetMapping(path = "/{reservationId}")
-    public ResponseEntity<ReservationDto> getById(@RequestHeader HttpHeaders headers, @PathVariable Long reservationId) {
+    public ResponseEntity<ReservationDto> getById(@PathVariable Long reservationId) {
         ReservationDto result = reservationService.getById(reservationId)
                 .map(ReservationDto::valueFrom)
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Company with %d does not exist", reservationId)));
@@ -65,13 +70,13 @@ public class ReservationController {
 
     @PutMapping(path = "/{reservationId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateReservation(@RequestHeader HttpHeaders headers, @PathVariable Long reservationId,
+    public void updateReservation(@PathVariable Long reservationId,
                              @Valid @RequestBody ReservationDto updatedReservation) {
         reservationService.updateReservation(reservationId, ReservationDto.convertToReservation(updatedReservation));
     }
 
     @DeleteMapping(path = "/{reservationId}")
-    public ResponseEntity<String> deleteReservation(@RequestHeader HttpHeaders headers, @PathVariable Long reservationId) {
+    public ResponseEntity<String> deleteReservation(@PathVariable Long reservationId) {
         boolean deleted = reservationService.deleteReservation(reservationId);
         if (!deleted) {
             return ResponseEntity.badRequest().body(String.format("Reservation with id %s does not exists.", reservationId));

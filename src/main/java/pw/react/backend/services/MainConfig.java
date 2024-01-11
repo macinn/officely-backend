@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import pw.react.backend.batch.BatchConfig;
+import pw.react.backend.dao.OfficePhotoRepository;
 import pw.react.backend.openapi.OpenApiConfig;
 import pw.react.backend.security.basic.BasicAuthenticationConfig;
 import pw.react.backend.security.jwt.services.JwtConfig;
@@ -56,6 +57,11 @@ public class MainConfig {
     @Bean
     public HttpService httpService(RestTemplate restTemplate) {
         return new HttpBaseService(restTemplate);
+    }
+
+    @Bean
+    public PhotoService officePhotoService(OfficePhotoRepository officePhotoRepository){
+        return new OfficePhotoService(officePhotoRepository);
     }
 
     @Bean

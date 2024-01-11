@@ -1,7 +1,10 @@
 package pw.react.backend.web;
 
+import jakarta.persistence.*;
 import pw.react.backend.models.Office;
 import pw.react.backend.models.User;
+
+import java.io.Serial;
 
 public record OfficeDto(
         long id,
@@ -9,11 +12,11 @@ public record OfficeDto(
         String description,
         float pricePerDay,
         boolean isActive,
-        String street,
-        String city,
-        String state,
-        String country,
-        String postalCode
+        String address,
+        String[] amenities,
+        Office.OfficeType officeType,
+        int rating,
+        int officeArea
 ) {
     public static OfficeDto valueFrom(Office office) {
         return new OfficeDto(
@@ -22,11 +25,11 @@ public record OfficeDto(
                 office.getDescription(),
                 office.getPricePerDay(),
                 office.isActive(),
-                office.getStreet(),
-                office.getCity(),
-                office.getState(),
-                office.getCountry(),
-                office.getPostalCode()
+                office.getAddress(),
+                Office.Amenities.getAmenities(office.getAmenities()),
+                office.getOfficeType(),
+                office.getRating(),
+                office.getOfficeArea()
         );
     }
     public static Office convertToOffice(OfficeDto officeDto)
@@ -37,11 +40,13 @@ public record OfficeDto(
         office.setDescription(officeDto.description());
         office.setPricePerDay(officeDto.pricePerDay());
         office.setActive(officeDto.isActive());
-        office.setStreet(officeDto.street());
-        office.setCity(officeDto.city());
-        office.setState(officeDto.state());
-        office.setCountry(officeDto.country());
-        office.setPostalCode(officeDto.postalCode());
+        office.setAddress(officeDto.address());
+        office.setAmenities(Office.Amenities.getAmenitiesMask(officeDto.amenities()));
+        office.setOfficeType(officeDto.officeType());
+        office.setRating(officeDto.rating());
+        office.setOfficeArea(officeDto.officeArea());
         return office;
     }
+
+    // TODO: Add lat, lng
 }

@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pw.react.backend.dao.ReservationRepository;
 import pw.react.backend.exceptions.ResourceNotFoundException;
-import pw.react.backend.models.Office;
 import pw.react.backend.models.Reservation;
 
 import java.util.Collection;
@@ -43,7 +42,7 @@ public class ReservationMainService implements ReservationService{
     }
 
     @Override
-    public Collection<Reservation> getAll() {
+    public Collection<Reservation> getAll(int pageSize, int pageNum, Optional<Integer> userId, Optional<Integer> officeId) {
         return null;
     }
 }

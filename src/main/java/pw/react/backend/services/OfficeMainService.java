@@ -43,7 +43,7 @@ public class OfficeMainService implements OfficeService{
     }
 
     @Override
-    public Collection<Office> getAll() {
+    public Collection<Office> getAll(int pageSize, int pageNum, String location, Optional<String> name, Optional<Integer> minPrice, Optional<Integer> maxPrice, Optional<String[]> amenities, Optional<String> officeType, Optional<Integer> minRating, Optional<Integer> minArea, String sort) {
         return null;
     }
 }

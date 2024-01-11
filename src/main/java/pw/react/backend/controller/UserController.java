@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import pw.react.backend.exceptions.UserValidationException;
 import pw.react.backend.services.UserService;
 import pw.react.backend.web.UserDto;
-
 import java.util.Collection;
+
 
 @RestController
 @RequestMapping(path = UserController.USERS_PATH)
@@ -55,9 +55,11 @@ public class UserController {
             throw new UserValidationException(ex.getMessage(), USERS_PATH);
         }
     }
+
     @GetMapping(path = "")
     public ResponseEntity<Collection<UserDto>> getGreaterId(@RequestParam("pageSize") int pageSize,
-                                                            @RequestParam("pageNum") int pageNum) {
+                                                            @RequestParam("pageNum") int pageNum
+    ) {
         try {
             Collection<UserDto> newUsers = userService.getUsersWithIdGreaterThan1(pageSize,pageNum)
                             .stream()
