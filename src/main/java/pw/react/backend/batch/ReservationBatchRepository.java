@@ -7,12 +7,10 @@ import pw.react.backend.models.Reservation;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
 
 public class ReservationBatchRepository implements BatchRepository<Reservation> {
     private final JdbcTemplate jdbcTemplate;

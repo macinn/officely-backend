@@ -3,17 +3,13 @@ package pw.react.backend.controller;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pw.react.backend.exceptions.ReservationValidationException;
 import pw.react.backend.exceptions.ResourceNotFoundException;
-import pw.react.backend.exceptions.UserValidationException;
 import pw.react.backend.services.ReservationService;
 import pw.react.backend.web.ReservationDto;
-import pw.react.backend.web.ReservationDto;
-import pw.react.backend.web.UserDto;
 
 import java.util.Collection;
 import java.util.Optional;

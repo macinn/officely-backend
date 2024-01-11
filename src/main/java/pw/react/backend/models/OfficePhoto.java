@@ -3,9 +3,6 @@ package pw.react.backend.models;
 import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 @Entity
 @Table(name = "office_photo")
 public class OfficePhoto {

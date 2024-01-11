@@ -1,10 +1,6 @@
 package pw.react.backend.web;
 
-import jakarta.persistence.*;
 import pw.react.backend.models.Office;
-import pw.react.backend.models.User;
-
-import java.io.Serial;
 
 public record OfficeDto(
         long id,
