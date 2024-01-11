@@ -64,10 +64,11 @@ public class OfficeController {
             @RequestParam(required = false, name = "officeType") Optional<String> officeType,
             @RequestParam(required = false, name = "minRating") Optional<Integer> minRating,
             @RequestParam(required = false, name = "minArea") Optional<Integer> minArea,
-            @RequestParam(required = false, name = "sort") String sort
+            @RequestParam(required = false, name = "sort") Optional<String> sort,
+            @RequestParam(required = false, name = "sortOrder") Optional<String> sortOrder
     ) {
         try {
-            Collection<OfficeDto> newOffices = officeService.getAll(pageSize, pageNum, location, name, minPrice, maxPrice, amenities, officeType, minRating, minArea, sort)
+            Collection<OfficeDto> newOffices = officeService.getAll(pageSize, pageNum, location, name, minPrice, maxPrice, amenities, officeType, minRating, minArea, sort, sortOrder)
                     .stream()
                     .map(OfficeDto::valueFrom)
                     .toList();

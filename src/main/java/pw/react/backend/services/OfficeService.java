@@ -12,5 +12,5 @@ public interface OfficeService {
     boolean deleteOffice(Long companyId);
     Collection<Office> batchSave(Collection<Office> offices);
     Optional<Office> getById(long companyId);
-    Collection<Office> getAll(int pageSize, int pageNum, String location, Optional<String> name, Optional<Integer> minPrice, Optional<Integer> maxPrice, Optional<String[]> amenities, Optional<String> officeType, Optional<Integer> minRating, Optional<Integer> minArea, String sort);
+    Collection<Office> getAll(int pageSize, int pageNum, String location, Optional<String> name, Optional<Integer> minPrice, Optional<Integer> maxPrice, Optional<String[]> amenities, Optional<String> officeType, Optional<Integer> minRating, Optional<Integer> minArea, Optional<String> sort, Optional<String> sortOrder);
 }
