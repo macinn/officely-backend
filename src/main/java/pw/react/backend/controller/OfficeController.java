@@ -1,6 +1,5 @@
 package pw.react.backend.controller;
 
-import com.google.maps.GeoApiContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -29,7 +28,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
-// TODO: Save service
 @RestController
 @RequestMapping(path = OfficeController.OFFICES_PATH)
 public class OfficeController {
@@ -37,14 +35,9 @@ public class OfficeController {
     static final String OFFICES_PATH = "/offices";
     private final OfficeService officeService;
     private PhotoService officePhotoService;
-    private GeoApiContext geoApiContext;
 
     public OfficeController(OfficeService officeService, PhotoService officePhotoService) {
         this.officeService = officeService;
-        // TODO: Move to config, fully remove
-        this.geoApiContext = new GeoApiContext.Builder()
-                .apiKey("AIzaSyD6qGi4RXb_I2uZtIHsoHNpNjSvPIJwGfE")
-                .build();
     }
 
     @Autowired
@@ -57,6 +50,7 @@ public class OfficeController {
             @RequestParam(required = true, name = "pageSize") int pageSize,
             @RequestParam(required = true, name = "pageNum") int pageNum,
             @RequestParam(required = true, name = "location") String location,
+            @RequestParam(required = false, name = "maxDistance") Optional<Integer> maxDistance,
             @RequestParam(required = false, name = "name") Optional<String> name,
             @RequestParam(required = false, name = "minPrice") Optional<Integer> minPrice,
             @RequestParam(required = false, name = "maxPrice") Optional<Integer> maxPrice,
@@ -68,7 +62,8 @@ public class OfficeController {
             @RequestParam(required = false, name = "sortOrder") Optional<String> sortOrder
     ) {
         try {
-            Collection<OfficeDto> newOffices = officeService.getAll(pageSize, pageNum, location, name, minPrice, maxPrice, amenities, officeType, minRating, minArea, sort, sortOrder)
+            Collection<OfficeDto> newOffices = officeService.getAll(pageSize, pageNum, location, maxDistance,
+                            name, minPrice, maxPrice, amenities, officeType, minRating, minArea, sort, sortOrder)
                     .stream()
                     .map(OfficeDto::valueFrom)
                     .toList();
@@ -81,7 +76,8 @@ public class OfficeController {
     @PostMapping(path = "")
     public ResponseEntity<Collection<OfficeDto>> createOffices(@RequestBody Collection<OfficeDto> offices) {
         try {
-            Collection<OfficeDto> newOffices = officeService.batchSave(offices.stream().map(OfficeDto::convertToOffice).toList())
+            Collection<OfficeDto> newOffices =
+                    officeService.batchSave(offices.stream().map(OfficeDto::convertToOffice).toList())
                     .stream()
                     .map(OfficeDto::valueFrom)
                     .toList();
@@ -116,19 +112,6 @@ public class OfficeController {
         return ResponseEntity.ok(String.format("Office with id %s deleted.", officeId));
     }
 
-//    @PostMapping("/address")
-//    public void getAddress() {
-//        try {
-//            GeocodingResult[] results =  GeocodingApi.geocode(geoApiContext,
-//                    "Domaniewska 34b").await();
-//            System.out.println(results[0].geometry.location.lat);
-//            System.out.println(results[0].geometry.location.lng);
-//            System.out.println(results[0].formattedAddress);
-//        } catch (Exception ex) {
-//            throw new OfficeValidationException(ex.getMessage(), OFFICES_PATH);
-//        }
-//    }
-
     // Photos
     @GetMapping(value = "/{officeId}/thumbnail", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public @ResponseBody byte[] getThumbnail(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
@@ -144,6 +127,10 @@ public class OfficeController {
     }
 
     @PostMapping("/{officeId}/thumbnail")
+    @RequestMapping(value = "/{officeId}/thumbnail",
+            produces = { "text/plain" },
+                consumes = { "multipart/mixed" },
+            method = RequestMethod.POST)
     public ResponseEntity<UploadFileResponse> uploadThumbnail(@RequestHeader HttpHeaders headers,
                                                           @PathVariable Long officeId,
                                                           @RequestParam("file") MultipartFile file) {
@@ -171,7 +158,8 @@ public class OfficeController {
     @GetMapping(value = "/{officeId}/photos", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public @ResponseBody byte[][] getPhotos(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
         Optional<OfficePhoto[]> officePhotos = officePhotoService.getOfficePhotos(officeId);
-        return officePhotos.map(photos -> Arrays.stream(photos).map(OfficePhoto::getData).toArray(byte[][]::new)).orElseGet(() -> new byte[0][]);
+        return officePhotos.map(photos -> Arrays.stream(photos)
+                .map(OfficePhoto::getData).toArray(byte[][]::new)).orElseGet(() -> new byte[0][]);
 
     }
 

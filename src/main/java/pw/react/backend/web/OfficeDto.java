@@ -43,6 +43,4 @@ public record OfficeDto(
         office.setOfficeArea(officeDto.officeArea());
         return office;
     }
-
-    // TODO: Add lat, lng
 }

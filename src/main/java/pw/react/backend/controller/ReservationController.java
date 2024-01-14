@@ -31,7 +31,6 @@ public class ReservationController {
             @RequestParam(required = false, name = "officeId") Optional<Integer> officeId
     ) {
         try {
-            // TODO: Paging, sorting, filtering
             Collection<ReservationDto> newReservations = reservationService.getAll(pageSize, pageNum, userId, officeId)
                     .stream()
                     .map(ReservationDto::valueFrom)
