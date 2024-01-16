@@ -69,23 +69,23 @@ public class BasicAuthenticationConfig {
                         authorizeRequests
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-//                                .requestMatchers(HttpMethod.POST, "/reservations/**").hasRole("ADMIN")
-//                                .requestMatchers(HttpMethod.POST, "/offices/**").hasRole("ADMIN")
-//                                .requestMatchers(HttpMethod.POST, "/users/**").hasRole("ADMIN")
-//
-//                                .requestMatchers(HttpMethod.PUT, "/reservations/**").hasRole("ADMIN")
-//                                .requestMatchers(HttpMethod.PUT, "/offices/**").hasRole("ADMIN")
-//                                .requestMatchers(HttpMethod.PUT, "/users/**").hasRole("ADMIN")
-//
-//                                .requestMatchers(HttpMethod.DELETE, "/reservations/**").hasRole("ADMIN")
-//                                .requestMatchers(HttpMethod.DELETE, "/offices/**").hasRole("ADMIN")
-//                                .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/reservations/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/offices/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/users/**").hasRole("ADMIN")
 
-//                                .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-//                                .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-//                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
-//                                .anyRequest().authenticated()
-                                .anyRequest().permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/reservations/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/offices/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/users/**").hasRole("ADMIN")
+
+                                .requestMatchers(HttpMethod.DELETE, "/reservations/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/offices/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
+
+                                .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
+                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                                .anyRequest().authenticated()
+//                                .anyRequest().permitAll()
                 )
                 // Add a filter to validate the tokens with every request
                 .addFilterBefore(basicAuthenticationRequestFilter, UsernamePasswordAuthenticationFilter.class)
