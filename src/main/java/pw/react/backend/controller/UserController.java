@@ -1,14 +1,11 @@
 package pw.react.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import pw.react.backend.exceptions.UserValidationException;
 import pw.react.backend.services.UserService;
@@ -31,17 +28,6 @@ public class UserController {
     }
 
     @Operation(summary = "Create new users")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "Users created",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(allOf = UserDto.class))}
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Something went wrong"
-            )
-    })
     @PostMapping(path = "")
     public ResponseEntity<Collection<UserDto>> createUsers(@RequestBody Collection<UserDto> users) {
         try {
@@ -58,8 +44,9 @@ public class UserController {
         }
     }
 
+    @Operation(summary = "Query users")
     @GetMapping(path = "")
-    public ResponseEntity<Collection<UserDto>> getGreaterId(@RequestParam("pageSize") int pageSize,
+    public ResponseEntity<Collection<UserDto>> getUsers(@RequestParam("pageSize") int pageSize,
                                                             @RequestParam("pageNum") int pageNum
     ) {
         try {
@@ -69,6 +56,18 @@ public class UserController {
                     .toList();
             log.info("Password is not going to be encoded");
             return ResponseEntity.status(HttpStatus.CREATED).body(newUsers);
+        } catch (Exception ex) {
+            throw new UserValidationException(ex.getMessage(), USERS_PATH);
+        }
+    }
+
+    @Operation(summary = "Update user")
+    @PutMapping(path = "/")
+    public ResponseEntity<UserDto> updateUser(Authentication authentication, @RequestBody UserDto user) {
+        try {
+            UserDto newUser = UserDto.valueFrom(userService.updatePassword(UserDto.convertToUser(user), authentication));
+            log.info("Password is not going to be encoded");
+            return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
         } catch (Exception ex) {
             throw new UserValidationException(ex.getMessage(), USERS_PATH);
         }

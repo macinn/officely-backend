@@ -35,6 +35,7 @@ class OfficePhotoService implements PhotoService {
             }
 
             OfficePhoto newOfficePhoto = new OfficePhoto(fileName, file.getContentType(), companyId, file.getBytes());
+
             return repository.save(newOfficePhoto);
         } catch (IOException ex) {
             throw new InvalidFileException("Could not store file " + fileName + ". Please try again!", ex);
@@ -57,6 +58,12 @@ class OfficePhotoService implements PhotoService {
     public void deleteOfficePhotos(long companyId) {
         repository.deleteByOfficeId(companyId);
         logger.info("Logo for the company with id {} deleted.", companyId);
+    }
+
+    @Override
+    public void deleteById(String photoId) {
+        repository.deleteById(photoId);
+        logger.info("Photo with id {} deleted.", photoId);
     }
 
 }

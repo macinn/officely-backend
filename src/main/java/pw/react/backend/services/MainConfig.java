@@ -14,6 +14,7 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import pw.react.backend.batch.BatchConfig;
 import pw.react.backend.dao.OfficePhotoRepository;
+import pw.react.backend.dao.SavedRepository;
 import pw.react.backend.openapi.OpenApiConfig;
 import pw.react.backend.security.basic.BasicAuthenticationConfig;
 import pw.react.backend.security.jwt.services.JwtConfig;
@@ -23,6 +24,7 @@ import java.util.*;
 import static java.util.stream.Collectors.toSet;
 
 @Configuration
+// TODO: Remove debug flag
 @EnableWebSecurity(debug = true)
 @Import({
         NonBatchConfig.class, BatchConfig.class, JwtConfig.class, OpenApiConfig.class, BasicAuthenticationConfig.class
@@ -65,6 +67,11 @@ public class MainConfig {
     }
 
     @Bean
+    public SavedService savedService(SavedRepository savedRepository){
+        return new SavedMainService(savedRepository);
+    }
+
+    @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
@@ -75,7 +82,6 @@ public class MainConfig {
                 } else {
                     for (String mapping : mappings) {
                         registry.addMapping(mapping).allowedOrigins(getCorsUrls());
-
                     }
                 }
             }

@@ -10,4 +10,6 @@ public interface PhotoService {
     Optional<OfficePhoto[]> getOfficePhotos(long officeId);
     Optional<OfficePhoto> getPhoto(String photoId);
     void deleteOfficePhotos(long officeId);
+
+    void deleteById(String photoId);
 }

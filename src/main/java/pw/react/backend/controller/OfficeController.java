@@ -1,9 +1,6 @@
 package pw.react.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -21,7 +19,10 @@ import pw.react.backend.models.Office;
 import pw.react.backend.models.OfficePhoto;
 import pw.react.backend.services.OfficeService;
 import pw.react.backend.services.PhotoService;
+import pw.react.backend.services.SavedService;
+import pw.react.backend.services.UserService;
 import pw.react.backend.web.OfficeDto;
+import pw.react.backend.web.SavedDto;
 import pw.react.backend.web.UploadFileResponse;
 
 import java.util.Arrays;
@@ -34,9 +35,12 @@ public class OfficeController {
     private static final Logger log = LoggerFactory.getLogger(OfficeController.class);
     static final String OFFICES_PATH = "/offices";
     private final OfficeService officeService;
-    private PhotoService officePhotoService;
 
-    public OfficeController(OfficeService officeService, PhotoService officePhotoService) {
+    private PhotoService officePhotoService;
+    private SavedService savedService;
+    private UserService userService;
+
+    public OfficeController(OfficeService officeService) {
         this.officeService = officeService;
     }
 
@@ -44,7 +48,12 @@ public class OfficeController {
     public void setOfficePhotoService(PhotoService officePhotoService) {
         this.officePhotoService = officePhotoService;
     }
+    @Autowired
+    public void setSavedService(SavedService savedService) { this.savedService = savedService;}
+    @Autowired
+    public void setUserService(UserService userService) { this.userService = userService;}
 
+    @Operation(summary = "Query offices")
     @GetMapping(path = "")
     public ResponseEntity<Collection<OfficeDto>> getOffices(
             @RequestParam(required = true, name = "pageSize") int pageSize,
@@ -73,6 +82,7 @@ public class OfficeController {
         }
     }
 
+    @Operation(summary = "Create new offices")
     @PostMapping(path = "")
     public ResponseEntity<Collection<OfficeDto>> createOffices(@RequestBody Collection<OfficeDto> offices) {
         try {
@@ -88,6 +98,7 @@ public class OfficeController {
         }
     }
 
+    @Operation(summary = "Get office by id")
     @GetMapping(path = "/{officeId}")
     public ResponseEntity<OfficeDto> getById(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
         OfficeDto result = officeService.getById(officeId)
@@ -96,6 +107,7 @@ public class OfficeController {
         return ResponseEntity.ok(result);
     }
 
+    @Operation(summary = "Update office by id")
     @PutMapping(path = "/{officeId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateOffice(@RequestHeader HttpHeaders headers, @PathVariable Long officeId,
@@ -103,6 +115,33 @@ public class OfficeController {
         officeService.updateOffice(officeId, OfficeDto.convertToOffice(updatedOffice));
     }
 
+    @Operation(summary = "Save office for later")
+    @PostMapping(path = "/{officeId}/save")
+    public ResponseEntity<SavedDto> saveForLater(Authentication authentication, @PathVariable Long officeId,
+                                               @Valid @RequestBody SavedDto savedDto) {
+        try {
+            userService.authenticate(savedDto.userId(), authentication);
+            savedService.save(SavedDto.convertToSaved(savedDto));
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedDto);
+        } catch (Exception ex) {
+            throw new OfficeValidationException(ex.getMessage(), OFFICES_PATH);
+        }
+    }
+
+    @Operation(summary = "Delete saved office")
+    @DeleteMapping(path = "/{officeId}/save")
+    public ResponseEntity<SavedDto> deleteSaved(Authentication authentication, @PathVariable Long officeId,
+                                               @Valid @RequestBody SavedDto savedDto) {
+        try {
+            userService.authenticate(savedDto.userId(), authentication);
+            savedService.delete(savedDto.officeId(), savedDto.userId());
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedDto);
+        } catch (Exception ex) {
+            throw new OfficeValidationException(ex.getMessage(), OFFICES_PATH);
+        }
+    }
+
+    @Operation(summary = "Delete office")
     @DeleteMapping(path = "/{officeId}")
     public ResponseEntity<String> deleteOffice(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
         boolean deleted = officeService.deleteOffice(officeId);
@@ -113,6 +152,7 @@ public class OfficeController {
     }
 
     // Photos
+    @Operation(summary = "Get main photo for company")
     @GetMapping(value = "/{officeId}/thumbnail", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public @ResponseBody byte[] getThumbnail(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
 
@@ -126,6 +166,7 @@ public class OfficeController {
             throw new ResourceNotFoundException(String.format("Office with %d does not exist", officeId));
     }
 
+    @Operation(summary = "Upload main photo for company")
     @PostMapping("/{officeId}/thumbnail")
     public ResponseEntity<UploadFileResponse> uploadThumbnail(@RequestHeader HttpHeaders headers,
                                                           @PathVariable Long officeId,
@@ -152,6 +193,7 @@ public class OfficeController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
     }
 
+    @Operation(summary = "Get all photos of a company")
     @GetMapping(value = "/{officeId}/photos", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     public @ResponseBody byte[][] getPhotos(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
         Optional<OfficePhoto[]> officePhotos = officePhotoService.getOfficePhotos(officeId);
@@ -160,6 +202,7 @@ public class OfficeController {
 
     }
 
+    @Operation(summary = "Upload photo for company")
     @PostMapping("/{officeId}/photos")
     public ResponseEntity<UploadFileResponse> uploadPhoto(@RequestHeader HttpHeaders headers,
                                                          @PathVariable Long officeId,
@@ -179,45 +222,11 @@ public class OfficeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-//    @Operation(summary = "Get logo for company")
-//    @ApiResponses(value = {
-//            @ApiResponse(
-//                    responseCode = "200",
-//                    description = "Get log by company id",
-//                    content = {@Content(mediaType = "application/json")}
-//            ),
-//            @ApiResponse(
-//                    responseCode = "401",
-//                    description = "Unauthorized operation",
-//                    content = {@Content(mediaType = "application/json")}
-//            )
-//    })
-//    @GetMapping(value = "/{officeId}/photos2")
-//    public ResponseEntity<Resource> getLogo2(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
-//        OfficePhoto companyLogo = officePhotoService.getOfficePhoto(officeId);
-//        return ResponseEntity.ok()
-//                .contentType(MediaType.parseMediaType(companyLogo.getFileType()))
-//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + companyLogo.getFileName() + "\"")
-//                .body(new ByteArrayResource(companyLogo.getData()));
-//    }
-
     @Operation(summary = "Delete photos for given company")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "204",
-                    description = "Logo deleted",
-                    content = {@Content(mediaType = "application/json")}
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized operation",
-                    content = {@Content(mediaType = "application/json")}
-            )
-    })
-    @DeleteMapping(value = "/{officeId}/photos")
+    @DeleteMapping(value = "/{officeId}/photos/{photoId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removePhotos    (@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
-        officePhotoService.deleteOfficePhotos(officeId);
+    public void removePhotos    (@RequestHeader HttpHeaders headers, @PathVariable Long officeId, @PathVariable String photoId) {
+        officePhotoService.deleteById(photoId);
     }
 
     // Fetch available data

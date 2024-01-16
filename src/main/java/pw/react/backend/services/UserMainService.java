@@ -3,6 +3,7 @@ package pw.react.backend.services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pw.react.backend.dao.UserRepository;
 import pw.react.backend.exceptions.UserValidationException;
@@ -10,6 +11,7 @@ import pw.react.backend.models.User;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 
 public class UserMainService implements UserService {
@@ -23,6 +25,7 @@ public class UserMainService implements UserService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
+
 
     @Override
     public User validateAndSave(User user) {
@@ -65,18 +68,26 @@ public class UserMainService implements UserService {
     }
 
     @Override
-    public User updatePassword(User user, String password) {
-        if (isValidUser(user)) {
-            if (passwordEncoder != null) {
-                log.debug("Encoding password.");
-                user.setPassword(passwordEncoder.encode(password));
+    public User updatePassword(User user, Authentication authentication) {
+        if (user != null && authentication != null && isValidUser(user)) {
+            User authUser = (User) authentication.getPrincipal();
+            if (authUser.getId().equals(user.getId())) {
+                Optional<User> dbUser = userRepository.findById(user.getId());
+                if (dbUser.isPresent()) {
+                    user.setId(dbUser.get().getId());
+                    return userRepository.save(user);
+                } else {
+                    log.error("User with id {} does not exist.", user.getId());
+                    throw new UserValidationException("User with id " + user.getId() + " does not exist.");
+                }
             } else {
-                log.debug("Password in plain text.");
-                user.setPassword(password);
+                log.error("User does not match provided ID");
+                throw new UserValidationException("User does not match provided ID");
             }
-            user = userRepository.save(user);
+        } else {
+            log.error("User or authentication is null");
+            throw new UserValidationException("User or authentication is null");
         }
-        return user;
     }
 
     @Override
@@ -96,5 +107,22 @@ public class UserMainService implements UserService {
     @Override
     public Collection<User> getUsersWithIdGreaterThan1(int pageSize, int pageNum) {
         return userRepository.findAll(PageRequest.of(pageNum, pageSize)).toList();
+    }
+
+    @Override
+    public boolean authenticate(Long userId, Authentication authentication) {
+        if(authentication != null)
+        {
+            User user = (User) authentication.getPrincipal();
+            if(Objects.equals(user.getId(), userId) || user.isAdmin()) {
+                return true;
+            }
+            else {
+                log.error("User does not match provided ID");
+                return false;
+            }
+        }
+        log.error("Authentication is null");
+        return false;
     }
 }

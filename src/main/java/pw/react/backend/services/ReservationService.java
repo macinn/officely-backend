@@ -11,6 +11,6 @@ public interface ReservationService {
     Reservation updateReservation(Long id, Reservation updatedReservation) throws ResourceNotFoundException;
     boolean deleteReservation(Long reservationId);
     Collection<Reservation> batchSave(Collection<Reservation> reservations);
-    Optional<Reservation> getById(long companyId);
+    Optional<Reservation> getById(long reservationId);
     Collection<Reservation> getAll(int pageSize, int pageNum, Optional<Integer> userId, Optional<Integer> officeId);
 }
