@@ -95,6 +95,6 @@ public class UserMainService implements UserService {
 
     @Override
     public Collection<User> getUsersWithIdGreaterThan1(int pageSize, int pageNum) {
-        return userRepository.findByIdGreaterThan(1L, PageRequest.of(pageNum, pageSize));
+        return userRepository.findAll(PageRequest.of(pageNum, pageSize)).toList();
     }
 }

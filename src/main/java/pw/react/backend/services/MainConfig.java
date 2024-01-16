@@ -23,7 +23,7 @@ import java.util.*;
 import static java.util.stream.Collectors.toSet;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 @Import({
         NonBatchConfig.class, BatchConfig.class, JwtConfig.class, OpenApiConfig.class, BasicAuthenticationConfig.class
 })

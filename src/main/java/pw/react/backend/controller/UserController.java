@@ -45,7 +45,8 @@ public class UserController {
     @PostMapping(path = "")
     public ResponseEntity<Collection<UserDto>> createUsers(@RequestBody Collection<UserDto> users) {
         try {
-            Collection<UserDto> newUsers = userService.batchSave(users.stream().map(UserDto::convertToUser).toList())
+            Collection<UserDto> newUsers = userService.batchSave(
+                    users.stream().map(UserDto::convertToUser).toList())
                     .stream()
                     .map(UserDto::valueFrom)
                     .toList();

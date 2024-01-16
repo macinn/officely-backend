@@ -15,6 +15,7 @@ public class OfficePhoto {
     private String fileType;
     private long officeId;
     @Lob
+    @Column(length = 200000000)
     private byte[] data;
 
     public OfficePhoto() {

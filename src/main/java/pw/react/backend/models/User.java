@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Entity
 @Table
@@ -19,6 +20,8 @@ public class User implements UserDetails {
     private String password;
     @Column
     private String email;
+    @Column(columnDefinition = "boolean default false")
+    private Boolean isAdmin;
 
     public Long getId() {
         return id;
@@ -56,7 +59,11 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList();
+        if (isAdmin) {
+            return List.of(() -> "ROLE_ADMIN");
+        } else {
+            return List.of(() -> "ROLE_USER");
+        }
     }
 
     @Override
@@ -77,5 +84,13 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public Boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(Boolean admin) {
+        isAdmin = admin;
     }
 }

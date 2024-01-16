@@ -15,7 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.filter.OncePerRequestFilter;
 import pw.react.backend.dao.UserRepository;
 import pw.react.backend.security.common.AuthenticationService;
@@ -68,12 +67,25 @@ public class BasicAuthenticationConfig {
                 .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers(HttpMethod.OPTIONS, "*").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                                // .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                                .anyRequest().authenticated()
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+//                                .requestMatchers(HttpMethod.POST, "/reservations/**").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.POST, "/offices/**").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.POST, "/users/**").hasRole("ADMIN")
+//
+//                                .requestMatchers(HttpMethod.PUT, "/reservations/**").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.PUT, "/offices/**").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.PUT, "/users/**").hasRole("ADMIN")
+//
+//                                .requestMatchers(HttpMethod.DELETE, "/reservations/**").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.DELETE, "/offices/**").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
+
+//                                .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+//                                .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
+//                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+//                                .anyRequest().authenticated()
+                                .anyRequest().permitAll()
                 )
                 // Add a filter to validate the tokens with every request
                 .addFilterBefore(basicAuthenticationRequestFilter, UsernamePasswordAuthenticationFilter.class)

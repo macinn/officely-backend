@@ -127,13 +127,10 @@ public class OfficeController {
     }
 
     @PostMapping("/{officeId}/thumbnail")
-    @RequestMapping(value = "/{officeId}/thumbnail",
-            produces = { "text/plain" },
-                consumes = { "multipart/mixed" },
-            method = RequestMethod.POST)
     public ResponseEntity<UploadFileResponse> uploadThumbnail(@RequestHeader HttpHeaders headers,
                                                           @PathVariable Long officeId,
-                                                          @RequestParam("file") MultipartFile file) {
+                                                          @RequestParam(value="file") MultipartFile file) {
+
         OfficePhoto officePhoto = officePhotoService.storePhoto(officeId, file);
         Optional<Office> office = officeService.getById(officeId);
 

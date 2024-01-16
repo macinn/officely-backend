@@ -11,6 +11,8 @@ public class OfficeBatchRepository implements BatchRepository<Office>{
     OfficeBatchRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
+
+    // TODO: implement
     @Override
     public Collection<Office> insertAll(Collection<Office> entities) {
         return null;

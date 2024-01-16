@@ -99,6 +99,6 @@ public class ReservationMainService implements ReservationService{
         if(officeId.isPresent()){
             reservationStream = reservationStream.filter(reservation -> reservation.getOfficeId() == officeId.get());
         }
-        return reservationStream.skip(Math.max((pageNum-1) * pageSize, 0)).limit(pageSize).toList();
+        return reservationStream.skip((long) pageNum * pageSize).limit(pageSize).toList();
     }
 }

@@ -5,10 +5,7 @@ import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import pw.react.backend.dao.OfficeRepository;
 import pw.react.backend.exceptions.ReservationValidationException;
 import pw.react.backend.exceptions.ResourceNotFoundException;
@@ -25,7 +22,7 @@ public class OfficeMainService implements OfficeService{
 
     final private String geoApiKey = "AIzaSyD6qGi4RXb_I2uZtIHsoHNpNjSvPIJwGfE";
 
-    private GeoApiContext geoApiContext;
+    private final GeoApiContext geoApiContext;
 
     protected OfficeMainService(OfficeRepository repository) {
         this.repository = repository;
@@ -157,6 +154,7 @@ public class OfficeMainService implements OfficeService{
             log.error("Invalid sort parameter.");
             throw new IllegalArgumentException("Invalid sort parameter.");
         }
+
         if(officeStream == null)
             officeStream = repository.findAll().stream();
 
@@ -201,7 +199,7 @@ public class OfficeMainService implements OfficeService{
             officeStream = officeStream.filter(office -> office.getOfficeArea() >= minArea.get());
         }
 
-        return officeStream.skip(Math.max(0, (pageNum - 1) * pageSize)).limit(pageSize).toList();
+        return officeStream.skip((long) pageNum * pageSize).limit(pageSize).toList();
     }
 
     // returns distance in meters
