@@ -3,10 +3,13 @@ package pw.react.backend.models;
 import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
+import java.io.Serial;
+
 @Entity
 @Table(name = "office_photo")
 public class OfficePhoto {
-
+    @Serial
+    private static final long serialVersionUID = -5807397203914552373L;
     @Id
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")

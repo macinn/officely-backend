@@ -7,11 +7,16 @@ import pw.react.backend.exceptions.ReservationValidationException;
 import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.models.Reservation;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static java.time.temporal.ChronoUnit.DAYS;
+
 
 public class ReservationMainService implements ReservationService{
     private final Logger log = LoggerFactory.getLogger(OfficeMainService.class);
@@ -101,4 +106,58 @@ public class ReservationMainService implements ReservationService{
         }
         return reservationStream.skip((long) pageNum * pageSize).limit(pageSize).toList();
     }
+
+    @Override
+    public boolean isReservationAvailable(LocalDateTime startDateTime, LocalDateTime endDateTime, long officeId) {
+        List<Reservation> reservationsContainingPeriod = repository.findByOfficeIdAndStartDateTimeBeforeAndEndDateTimeAfter(
+                officeId, startDateTime, endDateTime);
+        List<Reservation> reservationsStartingInPeriod = repository.findByOfficeIdAndStartDateTimeBetween(
+                officeId, startDateTime, endDateTime);
+        List<Reservation> reservationsEndingInPeriod = repository.findByOfficeIdAndEndDateTimeBetween(
+                officeId, startDateTime, endDateTime);
+        return reservationsContainingPeriod.isEmpty()
+                && reservationsStartingInPeriod.isEmpty()
+                && reservationsEndingInPeriod.isEmpty();
+    }
+
+    @Override
+    public LocalDateTime getAvailableStartDateTime(long officeId, LocalDateTime startDateTime) {
+        List<Reservation> reservations =
+                repository.findByOfficeIdOrderByStartDateTime(officeId);
+        LocalDate lastEnd = null;
+        for (Reservation reservation : reservations) {
+            if (lastEnd == null) {
+                lastEnd = reservation.getEndDateTime().toLocalDate();
+            } else {
+                LocalDate currentStart = reservation.getStartDateTime().toLocalDate();
+                if(DAYS.between(lastEnd, currentStart) > 1){
+                    return lastEnd.atStartOfDay();
+                } else {
+                    lastEnd = reservation.getEndDateTime().toLocalDate();
+                }
+            }
+        }
+        return LocalDateTime.now();
+    }
+
+    @Override
+    public LocalDateTime getAvailableStartEndTime(long officeId, LocalDateTime startDateTime) {
+        List<Reservation> reservations =
+                repository.findByOfficeIdOrderByStartDateTime(officeId);
+        LocalDate lastEnd = null;
+        for (Reservation reservation : reservations) {
+            if (lastEnd == null) {
+                lastEnd = reservation.getEndDateTime().toLocalDate();
+            } else {
+                LocalDate currentStart = reservation.getStartDateTime().toLocalDate();
+                if(DAYS.between(lastEnd, currentStart) > 1){
+                    return currentStart.atStartOfDay();
+                } else {
+                    lastEnd = reservation.getEndDateTime().toLocalDate();
+                }
+            }
+        }
+        return LocalDateTime.now();
+    }
+
 }

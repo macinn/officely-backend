@@ -1,0 +1,46 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="officely-prod" type="com.microsoft.intellij.run.configuration.WebAppConfigurationType" factoryName="Azure Web App">
+    <option name="appServicePlanName" value="" />
+    <option name="appServicePlanResourceGroupName" value="" />
+    <option name="appSettingsKey" value="0432a612-1e4a-4310-8c24-d4ce0fe624f3" />
+    <option name="appSettingsToRemove">
+      <set />
+    </option>
+    <option name="applicationLogLevel" value="Error" />
+    <option name="artifactIdentifier" value="pw.react:officely-backend:1.0.0" />
+    <option name="azureArtifactType" value="Maven" />
+    <option name="creatingAppServicePlan" value="false" />
+    <option name="creatingNew" value="false" />
+    <option name="creatingResGrp" value="false" />
+    <option name="deployToRoot" value="true" />
+    <option name="deployToSlot" value="false" />
+    <option name="enableApplicationLog" value="false" />
+    <option name="enableDetailedErrorMessage" value="false" />
+    <option name="enableFailedRequestTracing" value="false" />
+    <option name="enableWebServerLogging" value="false" />
+    <option name="newSlotConfigurationSource" />
+    <option name="newSlotName" />
+    <option name="openBrowserAfterDeployment" value="false" />
+    <option name="operatingSystem" value="linux" />
+    <option name="packaging" value="jar" />
+    <option name="pricing" value="" />
+    <option name="projectBase" value="" />
+    <option name="projectType" value="" />
+    <option name="region" value="" />
+    <option name="resourceGroup" value="" />
+    <option name="slotName" />
+    <option name="slotPanelVisible" value="true" />
+    <option name="subscriptionId" value="64a55bfd-6bb7-4ff0-9dbc-b51a22ea7028" />
+    <option name="targetName" value="" />
+    <option name="targetPath" value="" />
+    <option name="webAppContainer" value="Java SE" />
+    <option name="webAppId" value="/subscriptions/64a55bfd-6bb7-4ff0-9dbc-b51a22ea7028/resourceGroups/officely-backend_group/providers/Microsoft.Web/sites/officely" />
+    <option name="webAppJavaVersion" value="17" />
+    <option name="webAppName" value="" />
+    <option name="webServerLogQuota" value="35" />
+    <option name="webServerRetentionPeriod" />
+    <method v="2">
+      <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="package" />
+    </method>
+  </configuration>
+</component>

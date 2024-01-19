@@ -5,20 +5,27 @@ import com.google.maps.GeocodingApi;
 import com.google.maps.model.GeocodingResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 import pw.react.backend.dao.OfficeRepository;
+import pw.react.backend.dao.ReservationRepository;
 import pw.react.backend.exceptions.ReservationValidationException;
 import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.models.Office;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+@Service
 public class OfficeMainService implements OfficeService{
     private final Logger log = LoggerFactory.getLogger(OfficeMainService.class);
+
     final private OfficeRepository repository;
+    private ReservationService reservationService;
 
     final private String geoApiKey = "AIzaSyD6qGi4RXb_I2uZtIHsoHNpNjSvPIJwGfE";
 
@@ -31,6 +38,10 @@ public class OfficeMainService implements OfficeService{
                 .apiKey(geoApiKey)
                 .build();
     }
+
+    @Autowired
+    public void setReservationService(ReservationService reservationService) {
+        this.reservationService = reservationService;}
 
     @Override
     public Office validateAndSave(Office office) {
@@ -136,7 +147,11 @@ public class OfficeMainService implements OfficeService{
     }
 
     @Override
-    public Collection<Office> getAll(int pageSize, int pageNum, String location, Optional<Integer> maxDistance, Optional<String> name, Optional<Integer> minPrice, Optional<Integer> maxPrice, Optional<String[]> amenities, Optional<String> officeType, Optional<Integer> minRating, Optional<Integer> minArea, Optional<String> sort, Optional<String> sortOrder) {
+    public Collection<Office> getAll(int pageSize, int pageNum, String location,
+                              LocalDateTime availableFrom, LocalDateTime availableTo, Optional<Integer> maxDistance,
+                              Optional<String> name, Optional<Integer> minPrice, Optional<Integer> maxPrice,
+                              Optional<String[]> amenities, Optional<String> officeType, Optional<Integer> minRating,
+                              Optional<Integer> minArea, Optional<String> sort, Optional<String> sortOrder) {
         Stream<Office> officeStream = null;
         try{
             if(sort.isPresent())
@@ -198,6 +213,9 @@ public class OfficeMainService implements OfficeService{
         {
             officeStream = officeStream.filter(office -> office.getOfficeArea() >= minArea.get());
         }
+        // Filter available offices
+        officeStream = officeStream.filter(office ->
+                reservationService.isReservationAvailable(availableFrom, availableTo, office.getId()));
 
         return officeStream.skip((long) pageNum * pageSize).limit(pageSize).toList();
     }

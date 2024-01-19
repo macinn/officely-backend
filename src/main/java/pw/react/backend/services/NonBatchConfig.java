@@ -17,8 +17,8 @@ public class NonBatchConfig {
     public ReservationService reservationService(ReservationRepository reservationRepository) {
         return new ReservationMainService(reservationRepository);
     }
-    @Bean
-    public OfficeService officeService(OfficeRepository officeRepository) {
-        return new OfficeMainService(officeRepository);
-    }
+//    @Bean
+//    public OfficeService officeService(OfficeRepository officeRepository) {
+//        return new OfficeMainService(officeRepository);
+//    }
 }

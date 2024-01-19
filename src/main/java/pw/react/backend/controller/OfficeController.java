@@ -1,6 +1,11 @@
 package pw.react.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +22,7 @@ import pw.react.backend.exceptions.OfficeValidationException;
 import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.models.Office;
 import pw.react.backend.models.OfficePhoto;
+import pw.react.backend.models.User;
 import pw.react.backend.services.OfficeService;
 import pw.react.backend.services.PhotoService;
 import pw.react.backend.services.SavedService;
@@ -25,6 +31,7 @@ import pw.react.backend.web.OfficeDto;
 import pw.react.backend.web.SavedDto;
 import pw.react.backend.web.UploadFileResponse;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
@@ -59,6 +66,10 @@ public class OfficeController {
             @RequestParam(required = true, name = "pageSize") int pageSize,
             @RequestParam(required = true, name = "pageNum") int pageNum,
             @RequestParam(required = true, name = "location") String location,
+            @Parameter(example = "2024-01-01T00:00:00.0000")
+            @RequestParam(required = true, name = "availableFrom") LocalDateTime availableFrom,
+            @Parameter(example = "2025-01-01T00:00:00.0000")
+            @RequestParam(required = true, name = "availableTo") LocalDateTime availableTo,
             @RequestParam(required = false, name = "maxDistance") Optional<Integer> maxDistance,
             @RequestParam(required = false, name = "name") Optional<String> name,
             @RequestParam(required = false, name = "minPrice") Optional<Integer> minPrice,
@@ -71,8 +82,9 @@ public class OfficeController {
             @RequestParam(required = false, name = "sortOrder") Optional<String> sortOrder
     ) {
         try {
-            Collection<OfficeDto> newOffices = officeService.getAll(pageSize, pageNum, location, maxDistance,
-                            name, minPrice, maxPrice, amenities, officeType, minRating, minArea, sort, sortOrder)
+            Collection<OfficeDto> newOffices = officeService.getAll(pageSize, pageNum, location, availableFrom ,
+                            availableTo, maxDistance, name, minPrice, maxPrice, amenities, officeType,
+                            minRating, minArea, sort, sortOrder)
                     .stream()
                     .map(OfficeDto::valueFrom)
                     .toList();
@@ -82,7 +94,8 @@ public class OfficeController {
         }
     }
 
-    @Operation(summary = "Create new offices")
+    @Operation(summary = "Create new offices",
+            description = "Admin role required")
     @PostMapping(path = "")
     public ResponseEntity<Collection<OfficeDto>> createOffices(@RequestBody Collection<OfficeDto> offices) {
         try {
@@ -107,7 +120,8 @@ public class OfficeController {
         return ResponseEntity.ok(result);
     }
 
-    @Operation(summary = "Update office by id")
+    @Operation(summary = "Update office by id",
+            description = "Admin role required")
     @PutMapping(path = "/{officeId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateOffice(@RequestHeader HttpHeaders headers, @PathVariable Long officeId,
@@ -117,31 +131,20 @@ public class OfficeController {
 
     @Operation(summary = "Save office for later")
     @PostMapping(path = "/{officeId}/save")
-    public ResponseEntity<SavedDto> saveForLater(Authentication authentication, @PathVariable Long officeId,
-                                               @Valid @RequestBody SavedDto savedDto) {
-        try {
-            userService.authenticate(savedDto.userId(), authentication);
-            savedService.save(SavedDto.convertToSaved(savedDto));
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedDto);
-        } catch (Exception ex) {
-            throw new OfficeValidationException(ex.getMessage(), OFFICES_PATH);
-        }
+    public boolean saveForLater(Authentication authentication, @PathVariable Long officeId) {
+        User user = (User)authentication.getPrincipal();
+        return savedService.save(officeId, user.getId());
     }
 
     @Operation(summary = "Delete saved office")
     @DeleteMapping(path = "/{officeId}/save")
-    public ResponseEntity<SavedDto> deleteSaved(Authentication authentication, @PathVariable Long officeId,
-                                               @Valid @RequestBody SavedDto savedDto) {
-        try {
-            userService.authenticate(savedDto.userId(), authentication);
-            savedService.delete(savedDto.officeId(), savedDto.userId());
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedDto);
-        } catch (Exception ex) {
-            throw new OfficeValidationException(ex.getMessage(), OFFICES_PATH);
-        }
+    public boolean deleteSaved(Authentication authentication, @PathVariable Long officeId) {
+        User user = (User)authentication.getPrincipal();
+        return savedService.delete(officeId, user.getId());
     }
 
-    @Operation(summary = "Delete office")
+    @Operation(summary = "Delete office",
+            description = "Admin role required")
     @DeleteMapping(path = "/{officeId}")
     public ResponseEntity<String> deleteOffice(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
         boolean deleted = officeService.deleteOffice(officeId);
@@ -222,7 +225,8 @@ public class OfficeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "Delete photos for given company")
+    @Operation(summary = "Delete photos for given company",
+            description = "Admin role required")
     @DeleteMapping(value = "/{officeId}/photos/{photoId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removePhotos    (@RequestHeader HttpHeaders headers, @PathVariable Long officeId, @PathVariable String photoId) {

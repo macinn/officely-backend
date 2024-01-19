@@ -31,14 +31,16 @@ public class SavedMainService implements SavedService{
     }
 
     @Override
-    public Saved save(Saved saved) {
-        if(saved != null) {
-            savedRepository.save(saved);
-            return saved;
+    public boolean save(Long officeId, Long userId) {
+        Optional<Saved> saved = savedRepository.findByUserIdAndOfficeId(userId, officeId);
+        if(saved.isEmpty())
+        {
+            Saved savedNew = new Saved();
+            savedNew.setOfficeId(officeId);
+            savedNew.setUserId(userId);
+            savedRepository.save(savedNew);
         }
-        else {
-            log.error("Saved is null.");
-            throw new NullPointerException("Saved is null.");
-        }
+        return true;
     }
+
 }

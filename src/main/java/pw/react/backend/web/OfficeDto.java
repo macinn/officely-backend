@@ -1,6 +1,13 @@
 package pw.react.backend.web;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import pw.react.backend.models.Office;
+import pw.react.backend.utils.JsonDateDeserializer;
+import pw.react.backend.utils.JsonDateSerializer;
+
+import java.time.LocalDateTime;
 
 public record OfficeDto(
         long id,
@@ -9,6 +16,12 @@ public record OfficeDto(
         float pricePerDay,
         boolean isActive,
         String address,
+        @JsonProperty(required = false)
+        @JsonDeserialize(using = JsonDateDeserializer.class) @JsonSerialize(using = JsonDateSerializer.class)
+        LocalDateTime availableFrom,
+        @JsonProperty(required = false)
+        @JsonDeserialize(using = JsonDateDeserializer.class) @JsonSerialize(using = JsonDateSerializer.class)
+        LocalDateTime availableTo,
         String[] amenities,
         Office.OfficeType officeType,
         int rating,
@@ -22,6 +35,8 @@ public record OfficeDto(
                 office.getPricePerDay(),
                 office.isActive(),
                 office.getAddress(),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
                 Office.Amenities.getAmenities(office.getAmenities()),
                 office.getOfficeType(),
                 office.getRating(),

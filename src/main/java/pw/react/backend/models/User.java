@@ -4,12 +4,15 @@ import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.List;
 
 @Entity
 @Table
 public class User implements UserDetails {
+    @Serial
+    private static final long serialVersionUID = 1346339160264579674L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

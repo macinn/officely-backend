@@ -27,10 +27,18 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Create new users")
+    @Operation(summary = "Register new users",
+            description = "Only admin can add new admin account")
     @PostMapping(path = "")
-    public ResponseEntity<Collection<UserDto>> createUsers(@RequestBody Collection<UserDto> users) {
+    public ResponseEntity<Collection<UserDto>> createUsers(Authentication authentication,
+                                                           @RequestBody Collection<UserDto> users) {
         try {
+            // check if admin is adding admin
+            if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER"))) {
+                if (users.stream().anyMatch(UserDto::isAdmin)) {
+                    throw new UserValidationException("User cannot add admin account", USERS_PATH);
+                }
+            }
             Collection<UserDto> newUsers = userService.batchSave(
                     users.stream().map(UserDto::convertToUser).toList())
                     .stream()

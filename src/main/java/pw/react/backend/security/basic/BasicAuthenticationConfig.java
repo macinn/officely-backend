@@ -71,7 +71,7 @@ public class BasicAuthenticationConfig {
 
                                 .requestMatchers(HttpMethod.POST, "/reservations/**").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.POST, "/offices/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/users/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/users/**").permitAll()
 
                                 .requestMatchers(HttpMethod.PUT, "/reservations/**").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/offices/**").hasRole("ADMIN")
@@ -83,9 +83,8 @@ public class BasicAuthenticationConfig {
 
                                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/favicon.ico").permitAll()
                                 .anyRequest().authenticated()
-//                                .anyRequest().permitAll()
                 )
                 // Add a filter to validate the tokens with every request
                 .addFilterBefore(basicAuthenticationRequestFilter, UsernamePasswordAuthenticationFilter.class)
