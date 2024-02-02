@@ -13,8 +13,8 @@ public interface OfficeService {
     boolean deleteOffice(Long companyId);
     Collection<Office> batchSave(Collection<Office> offices);
     Optional<Office> getById(long companyId);
-    Collection<Office> getAll(int pageSize, int pageNum, String location,
-                              LocalDateTime availableFrom, LocalDateTime availableTo, Optional<Integer> maxDistance,
+    Collection<Office> getAll(int pageSize, int pageNum, Optional<String> location,
+                              Optional<LocalDateTime> availableFrom, Optional<LocalDateTime> availableTo, Optional<Integer> maxDistance,
                               Optional<String> name, Optional<Integer> minPrice, Optional<Integer> maxPrice,
                               Optional<String[]> amenities, Optional<String> officeType, Optional<Integer> minRating,
                               Optional<Integer> minArea, Optional<String> sort, Optional<String> sortOrder);

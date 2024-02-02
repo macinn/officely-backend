@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import pw.react.backend.dao.OfficeRepository;
-import pw.react.backend.dao.ReservationRepository;
 import pw.react.backend.exceptions.ReservationValidationException;
 import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.models.Office;
@@ -147,8 +146,8 @@ public class OfficeMainService implements OfficeService{
     }
 
     @Override
-    public Collection<Office> getAll(int pageSize, int pageNum, String location,
-                              LocalDateTime availableFrom, LocalDateTime availableTo, Optional<Integer> maxDistance,
+    public Collection<Office> getAll(int pageSize, int pageNum, Optional<String> location,
+                              Optional<LocalDateTime> availableFrom, Optional<LocalDateTime> availableTo, Optional<Integer> maxDistance,
                               Optional<String> name, Optional<Integer> minPrice, Optional<Integer> maxPrice,
                               Optional<String[]> amenities, Optional<String> officeType, Optional<Integer> minRating,
                               Optional<Integer> minArea, Optional<String> sort, Optional<String> sortOrder) {
@@ -174,11 +173,13 @@ public class OfficeMainService implements OfficeService{
             officeStream = repository.findAll().stream();
 
         try {
-            int maxDistanceValue = maxDistance.orElse(5) * 1000;
-            GeocodingResult[] results = GeocodingApi.geocode(geoApiContext, location).await();
-            officeStream.filter(office ->
-                    distance(results[0].geometry.location.lat, results[0].geometry.location.lng,
-                            office.getLat(), office.getLng()) <= maxDistanceValue).toList();
+            if(location.isPresent()) {
+                int maxDistanceValue = maxDistance.orElse(5) * 1000;
+                GeocodingResult[] results = GeocodingApi.geocode(geoApiContext, location.get()).await();
+                officeStream.filter(office ->
+                        distance(results[0].geometry.location.lat, results[0].geometry.location.lng,
+                                office.getLat(), office.getLng()) <= maxDistanceValue).toList();
+            }
         }
         catch (Exception e)
         {
@@ -214,8 +215,9 @@ public class OfficeMainService implements OfficeService{
             officeStream = officeStream.filter(office -> office.getOfficeArea() >= minArea.get());
         }
         // Filter available offices
-        officeStream = officeStream.filter(office ->
-                reservationService.isReservationAvailable(availableFrom, availableTo, office.getId()));
+        if(availableFrom.isPresent() && availableTo.isPresent())
+            officeStream = officeStream.filter(office ->
+                    reservationService.isReservationAvailable(availableFrom.get(), availableTo.get(), office.getId()));
 
         return officeStream.skip((long) pageNum * pageSize).limit(pageSize).toList();
     }

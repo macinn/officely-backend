@@ -2,10 +2,6 @@ package pw.react.backend.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import io.swagger.v3.oas.annotations.security.SecuritySchemes;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +24,6 @@ import pw.react.backend.services.PhotoService;
 import pw.react.backend.services.SavedService;
 import pw.react.backend.services.UserService;
 import pw.react.backend.web.OfficeDto;
-import pw.react.backend.web.SavedDto;
 import pw.react.backend.web.UploadFileResponse;
 
 import java.time.LocalDateTime;
@@ -36,6 +31,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
+// TODO: Completely change how images are handled
 @RestController
 @RequestMapping(path = OfficeController.OFFICES_PATH)
 public class OfficeController {
@@ -65,11 +61,11 @@ public class OfficeController {
     public ResponseEntity<Collection<OfficeDto>> getOffices(
             @RequestParam(required = true, name = "pageSize") int pageSize,
             @RequestParam(required = true, name = "pageNum") int pageNum,
-            @RequestParam(required = true, name = "location") String location,
+            @RequestParam(required = false, name = "location") Optional<String> location,
             @Parameter(example = "2024-01-01T00:00:00.0000")
-            @RequestParam(required = true, name = "availableFrom") LocalDateTime availableFrom,
+            @RequestParam(required = false, name = "availableFrom") Optional<LocalDateTime> availableFrom,
             @Parameter(example = "2025-01-01T00:00:00.0000")
-            @RequestParam(required = true, name = "availableTo") LocalDateTime availableTo,
+            @RequestParam(required = false, name = "availableTo") Optional<LocalDateTime> availableTo,
             @RequestParam(required = false, name = "maxDistance") Optional<Integer> maxDistance,
             @RequestParam(required = false, name = "name") Optional<String> name,
             @RequestParam(required = false, name = "minPrice") Optional<Integer> minPrice,
