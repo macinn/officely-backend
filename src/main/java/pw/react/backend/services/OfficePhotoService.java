@@ -2,15 +2,10 @@ package pw.react.backend.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 import pw.react.backend.dao.OfficePhotoRepository;
-import pw.react.backend.exceptions.InvalidFileException;
 import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.models.OfficePhoto;
 
-import java.io.IOException;
-import java.util.Objects;
 import java.util.Optional;
 
 class OfficePhotoService implements PhotoService {

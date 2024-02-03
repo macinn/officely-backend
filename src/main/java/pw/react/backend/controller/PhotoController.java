@@ -1,29 +1,15 @@
 package pw.react.backend.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import pw.react.backend.exceptions.ResourceNotFoundException;
-import pw.react.backend.models.Office;
-import pw.react.backend.models.OfficePhoto;
 import pw.react.backend.services.AzureBlobService;
 import pw.react.backend.services.PhotoService;
-import pw.react.backend.web.UploadFileResponse;
+
+import java.io.File;
+import java.io.IOException;
 
 
 @RestController
