@@ -161,7 +161,7 @@ public class Office implements Serializable {
             this.value = value;
         }
         public static String[] getAmenities(long amenities){
-            List<String> amenitiesCollection = new ArrayList<String>();
+            List<String> amenitiesCollection = new ArrayList<>();
             for(Amenities amenity : Amenities.values()){
                 if((amenity.getValue() & amenities) != 0){
                     amenitiesCollection.add(amenity.name());
@@ -176,7 +176,7 @@ public class Office implements Serializable {
             }
             return amenitiesMask;
         }
-    };
+    }
 
     public enum OfficeType {
         CONFERENCE_ROOM,

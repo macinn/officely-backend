@@ -14,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -35,32 +34,32 @@ public class AzureBlobService {
 
     public String upload(MultipartFile multipartFile) throws IOException {
 
-        String blobName = UUID.randomUUID().toString() + "_" + multipartFile.getOriginalFilename();
+        String blobName = UUID.randomUUID() + "_" + multipartFile.getOriginalFilename();
         BlobClient blob = blobContainerClient.getBlobClient(blobName);
         blob.upload(multipartFile.getInputStream(), multipartFile.getSize(), true);
         return blob.getBlobUrl();
     }
 
-    public byte[] getFile(String fileName) throws URISyntaxException {
-
-        BlobClient blob = blobContainerClient.getBlobClient(fileName);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        blob.download(outputStream);
-        final byte[] bytes = outputStream.toByteArray();
-        return bytes;
-
-    }
-
-    public List<String> listBlobs() {
-
-        PagedIterable<BlobItem> items = blobContainerClient.listBlobs();
-        List<String> names = new ArrayList<String>();
-        for (BlobItem item : items) {
-            names.add(item.getName());
-        }
-        return names;
-
-    }
+//    public byte[] getFile(String fileName) throws URISyntaxException {
+//
+//        BlobClient blob = blobContainerClient.getBlobClient(fileName);
+//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//        blob.download(outputStream);
+//        final byte[] bytes = outputStream.toByteArray();
+//        return bytes;
+//
+//    }
+//
+//    public List<String> listBlobs() {
+//
+//        PagedIterable<BlobItem> items = blobContainerClient.listBlobs();
+//        List<String> names = new ArrayList<String>();
+//        for (BlobItem item : items) {
+//            names.add(item.getName());
+//        }
+//        return names;
+//
+//    }
 
     public Boolean deleteBlob(String blobName) {
 
