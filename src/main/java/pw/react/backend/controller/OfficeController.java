@@ -71,12 +71,14 @@ public class OfficeController {
             @RequestParam(required = false, name = "minRating") Optional<Integer> minRating,
             @RequestParam(required = false, name = "minArea") Optional<Integer> minArea,
             @RequestParam(required = false, name = "sort") Optional<String> sort,
-            @RequestParam(required = false, name = "sortOrder") Optional<String> sortOrder
+            @RequestParam(required = false, name = "sortOrder") Optional<String> sortOrder,
+            @RequestParam(required = false, name = "lat") Optional<Double> lat,
+            @RequestParam(required = false, name = "lng") Optional<Double> lng
     ) {
         try {
             Collection<OfficeDto> newOffices = officeService.getAll(pageSize, pageNum, location, availableFrom ,
                             availableTo, maxDistance, name, minPrice, maxPrice, amenities, officeType,
-                            minRating, minArea, sort, sortOrder)
+                            minRating, minArea, sort, sortOrder, lat, lng)
                     .stream()
                     .map(office -> {
                         String mainPhoto = "";
