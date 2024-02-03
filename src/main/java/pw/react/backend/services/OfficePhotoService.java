@@ -21,7 +21,13 @@ class OfficePhotoService implements PhotoService {
     @Override
     public OfficePhoto storePhoto(String fileUrl, String fileName, long companyId, boolean isMain) {
         OfficePhoto newOfficePhoto = new OfficePhoto(fileUrl, fileName, companyId, isMain);
-
+        if(isMain)
+        {
+            repository.findByOfficeIdAndIsMain(companyId, true).ifPresent(photo -> {
+                photo.setMain(false);
+                repository.save(photo);
+            });
+        }
         return repository.save(newOfficePhoto);
     }
 
