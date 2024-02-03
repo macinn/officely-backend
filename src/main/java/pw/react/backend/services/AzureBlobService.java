@@ -15,8 +15,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -67,17 +70,28 @@ public class AzureBlobService {
     }
 
     public String uploadFromUrl(String photoUrl) throws IOException {
-        String blobName = UUID.randomUUID().toString() + "_" + new File(photoUrl).getName();
+        String blobName = UUID.randomUUID().toString() + "_" + new File(photoUrl).getName() + ".jpeg";
+
+        try {
+            URL url = new URL(photoUrl);
+            String path = url.getPath();
+            Path filePath = Paths.get(path);
+            blobName = UUID.randomUUID().toString() + "_" + filePath.getFileName().toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         URL url = new URL(photoUrl);
+        try {
+            HttpURLConnection httpcon = (HttpURLConnection) url.openConnection();
+            httpcon.addRequestProperty("User-Agent", "Mozilla/4.0");
 
-        try (InputStream in = url.openStream()) {
             BlobClient blobClient = blobContainerClient.getBlobClient(blobName);
-            blobClient.upload(in, true);
+            blobClient.upload(httpcon.getInputStream(), true);
             return blobClient.getBlobUrl();
         }
         catch (Exception e) {
-            log.error("Error while uploading file from url");
+            log.error("Error while uploading file from url " + e.getMessage());
         }
         return null;
     }

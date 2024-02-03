@@ -35,8 +35,6 @@ public class Office implements Serializable {
     @Enumerated(EnumType.STRING)
     private OfficeType officeType;
     @Column
-    private String officePhotoThumbnailId;
-    @Column
     private int rating;
     @Column
     private int officeArea;
@@ -111,14 +109,6 @@ public class Office implements Serializable {
 
     public void setOfficeType(OfficeType officeType) {
         this.officeType = officeType;
-    }
-
-    public String getOfficePhotoThumbnailId() {
-        return officePhotoThumbnailId;
-    }
-
-    public void setOfficePhotoThumbnailId(String officePhotoThumbnailId) {
-        this.officePhotoThumbnailId = officePhotoThumbnailId;
     }
 
     public int getRating() {

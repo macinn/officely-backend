@@ -56,4 +56,8 @@ public class OfficePhoto {
     public void setOfficeId(long officeId) {
         this.officeId = officeId;
     }
+
+    public void setMain(boolean main) {
+        isMain = main;
+    }
 }

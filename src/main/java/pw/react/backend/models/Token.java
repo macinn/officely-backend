@@ -36,12 +36,4 @@ public class Token {
     public void setValue(String value) {
         this.value = value;
     }
-
-    public LocalDateTime getCreated() {
-        return created;
-    }
-
-    public void setCreated(LocalDateTime created) {
-        this.created = created;
-    }
 }
