@@ -17,6 +17,7 @@ public interface OfficeService {
                               Optional<LocalDateTime> availableFrom, Optional<LocalDateTime> availableTo, Optional<Integer> maxDistance,
                               Optional<String> name, Optional<Integer> minPrice, Optional<Integer> maxPrice,
                               Optional<String[]> amenities, Optional<String> officeType, Optional<Integer> minRating,
-                              Optional<Integer> minArea, Optional<String> sort, Optional<String> sortOrder);
+                              Optional<Integer> minArea, Optional<String> sort, Optional<String> sortOrder,
+                              Optional<Double> lat, Optional<Double> lng);
 
 }

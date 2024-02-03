@@ -150,7 +150,8 @@ public class OfficeMainService implements OfficeService{
                               Optional<LocalDateTime> availableFrom, Optional<LocalDateTime> availableTo, Optional<Integer> maxDistance,
                               Optional<String> name, Optional<Integer> minPrice, Optional<Integer> maxPrice,
                               Optional<String[]> amenities, Optional<String> officeType, Optional<Integer> minRating,
-                              Optional<Integer> minArea, Optional<String> sort, Optional<String> sortOrder) {
+                              Optional<Integer> minArea, Optional<String> sort, Optional<String> sortOrder,
+                              Optional<Double> lat, Optional<Double> lng) {
         Stream<Office> officeStream = null;
         try{
             if(sort.isPresent())
@@ -176,15 +177,23 @@ public class OfficeMainService implements OfficeService{
             if(location.isPresent()) {
                 int maxDistanceValue = maxDistance.orElse(5) * 1000;
                 GeocodingResult[] results = GeocodingApi.geocode(geoApiContext, location.get()).await();
-                officeStream.filter(office ->
+                officeStream = officeStream.filter(office ->
                         distance(results[0].geometry.location.lat, results[0].geometry.location.lng,
-                                office.getLat(), office.getLng()) <= maxDistanceValue).toList();
+                                office.getLat(), office.getLng()) <= maxDistanceValue);
             }
         }
         catch (Exception e)
         {
             log.error("Invalid location parameter.");
             throw new IllegalArgumentException("Invalid location parameter.");
+        }
+
+        if (lat.isPresent() && lng.isPresent())
+        {
+            int maxDistanceValue = maxDistance.orElse(5) * 1000;
+            officeStream = officeStream.filter(office ->
+                    distance(lat.get(), lng.get(),
+                            office.getLat(), office.getLng()) <= maxDistanceValue);
         }
 
         if(name.isPresent()){
@@ -214,7 +223,7 @@ public class OfficeMainService implements OfficeService{
         {
             officeStream = officeStream.filter(office -> office.getOfficeArea() >= minArea.get());
         }
-        // Filter available offices
+
         if(availableFrom.isPresent() && availableTo.isPresent())
             officeStream = officeStream.filter(office ->
                     reservationService.isReservationAvailable(availableFrom.get(), availableTo.get(), office.getId()));
