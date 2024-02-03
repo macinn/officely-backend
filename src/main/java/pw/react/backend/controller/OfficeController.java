@@ -19,19 +19,16 @@ import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.models.Office;
 import pw.react.backend.models.OfficePhoto;
 import pw.react.backend.models.User;
-import pw.react.backend.services.OfficeService;
-import pw.react.backend.services.PhotoService;
-import pw.react.backend.services.SavedService;
-import pw.react.backend.services.UserService;
+import pw.react.backend.services.*;
 import pw.react.backend.web.OfficeDto;
 import pw.react.backend.web.UploadFileResponse;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
-// TODO: Completely change how images are handled
 @RestController
 @RequestMapping(path = OfficeController.OFFICES_PATH)
 public class OfficeController {
@@ -39,22 +36,25 @@ public class OfficeController {
     static final String OFFICES_PATH = "/offices";
     private final OfficeService officeService;
 
-    private PhotoService officePhotoService;
+
     private SavedService savedService;
     private UserService userService;
+    private PhotoService officePhotoService;
+    @Autowired
+    private AzureBlobService azureBlobAdapter;
 
     public OfficeController(OfficeService officeService) {
         this.officeService = officeService;
     }
 
     @Autowired
-    public void setOfficePhotoService(PhotoService officePhotoService) {
-        this.officePhotoService = officePhotoService;
-    }
-    @Autowired
     public void setSavedService(SavedService savedService) { this.savedService = savedService;}
     @Autowired
     public void setUserService(UserService userService) { this.userService = userService;}
+    @Autowired
+    public void setOfficePhotoService(PhotoService officePhotoService) {
+        this.officePhotoService = officePhotoService;
+    }
 
     @Operation(summary = "Query offices")
     @GetMapping(path = "")
@@ -82,7 +82,19 @@ public class OfficeController {
                             availableTo, maxDistance, name, minPrice, maxPrice, amenities, officeType,
                             minRating, minArea, sort, sortOrder)
                     .stream()
-                    .map(OfficeDto::valueFrom)
+                    .map(office -> {
+                        String mainPhoto = "";
+                        String[] photos = new String[0];
+                        Optional<OfficePhoto> mainPhotoOptional = officePhotoService.getOfficeMainPhoto(office.getId());
+                        if (mainPhotoOptional.isPresent()) {
+                            mainPhoto = mainPhotoOptional.get().getUrl();
+                        }
+                        Optional<OfficePhoto[]> photosOptional = officePhotoService.getOfficePhotos(office.getId());
+                        if (photosOptional.isPresent()) {
+                            photos = Arrays.stream(photosOptional.get()).map(OfficePhoto::getUrl).toArray(String[]::new);
+                        }
+                        return OfficeDto.valueFrom(office, mainPhoto, photos);
+                    })
                     .toList();
             return ResponseEntity.status(HttpStatus.CREATED).body(newOffices);
         } catch (Exception ex) {
@@ -95,10 +107,34 @@ public class OfficeController {
     @PostMapping(path = "")
     public ResponseEntity<Collection<OfficeDto>> createOffices(@RequestBody Collection<OfficeDto> offices) {
         try {
+            for(OfficeDto office : offices) {
+                if(!office.mainPhoto().isBlank()) {
+                    String fileName = azureBlobAdapter.uploadFromUrl(office.mainPhoto());
+                    officePhotoService.storePhoto(fileName, new File(office.mainPhoto()).getName(), office.id(), true);
+                }
+                if(office.photos() != null) {
+                    for(String fileUrl : office.photos()) {
+                        String fileName = azureBlobAdapter.uploadFromUrl(fileUrl);
+                        officePhotoService.storePhoto(fileName, new File(fileUrl).getName(), office.id(), true);
+                    }
+                }
+            }
             Collection<OfficeDto> newOffices =
                     officeService.batchSave(offices.stream().map(OfficeDto::convertToOffice).toList())
                     .stream()
-                    .map(OfficeDto::valueFrom)
+                            .map(office -> {
+                                String mainPhoto = "";
+                                String[] photos = new String[0];
+                                Optional<OfficePhoto> mainPhotoOptional = officePhotoService.getOfficeMainPhoto(office.getId());
+                                if (mainPhotoOptional.isPresent()) {
+                                    mainPhoto = mainPhotoOptional.get().getUrl();
+                                }
+                                Optional<OfficePhoto[]> photosOptional = officePhotoService.getOfficePhotos(office.getId());
+                                if (photosOptional.isPresent()) {
+                                    photos = Arrays.stream(photosOptional.get()).map(OfficePhoto::getUrl).toArray(String[]::new);
+                                }
+                                return OfficeDto.valueFrom(office, mainPhoto, photos);
+                            })
                     .toList();
 
             return ResponseEntity.status(HttpStatus.CREATED).body(newOffices);
@@ -111,7 +147,19 @@ public class OfficeController {
     @GetMapping(path = "/{officeId}")
     public ResponseEntity<OfficeDto> getById(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
         OfficeDto result = officeService.getById(officeId)
-                .map(OfficeDto::valueFrom)
+                .map(office -> {
+                    String mainPhoto = "";
+                    String[] photos = new String[0];
+                    Optional<OfficePhoto> mainPhotoOptional = officePhotoService.getOfficeMainPhoto(office.getId());
+                    if (mainPhotoOptional.isPresent()) {
+                        mainPhoto = mainPhotoOptional.get().getUrl();
+                    }
+                    Optional<OfficePhoto[]> photosOptional = officePhotoService.getOfficePhotos(office.getId());
+                    if (photosOptional.isPresent()) {
+                        photos = Arrays.stream(photosOptional.get()).map(OfficePhoto::getUrl).toArray(String[]::new);
+                    }
+                    return OfficeDto.valueFrom(office, mainPhoto, photos);
+                })
                 .orElseThrow(() -> new ResourceNotFoundException(String.format("Company with %d does not exist", officeId)));
         return ResponseEntity.ok(result);
     }
@@ -148,85 +196,6 @@ public class OfficeController {
             return ResponseEntity.badRequest().body(String.format("Office with id %s does not exists.", officeId));
         }
         return ResponseEntity.ok(String.format("Office with id %s deleted.", officeId));
-    }
-
-    // Photos
-    @Operation(summary = "Get main photo for company")
-    @GetMapping(value = "/{officeId}/thumbnail", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public @ResponseBody byte[] getThumbnail(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
-
-        Optional<Office> office = officeService.getById(officeId);
-        if(office.isPresent()) {
-            String thumbnailId = office.get().getOfficePhotoThumbnailId();
-            Optional<OfficePhoto> officeThumbnail = officePhotoService.getPhoto(thumbnailId);
-            return officeThumbnail.map(OfficePhoto::getData).orElseGet(() -> new byte[0]);
-        }
-        else
-            throw new ResourceNotFoundException(String.format("Office with %d does not exist", officeId));
-    }
-
-    @Operation(summary = "Upload main photo for company")
-    @PostMapping("/{officeId}/thumbnail")
-    public ResponseEntity<UploadFileResponse> uploadThumbnail(@RequestHeader HttpHeaders headers,
-                                                          @PathVariable Long officeId,
-                                                          @RequestParam(value="file") MultipartFile file) {
-
-        OfficePhoto officePhoto = officePhotoService.storePhoto(officeId, file);
-        Optional<Office> office = officeService.getById(officeId);
-
-        if(office.isPresent()) {
-            office.get().setOfficePhotoThumbnailId(officePhoto.getId());
-            officeService.updateOffice(officeId, office.get());
-            String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/companies/" + officeId + "/logo/")
-                    .path(officePhoto.getFileName())
-                    .toUriString();
-            UploadFileResponse response = new UploadFileResponse(
-                    officePhoto.getFileName(),
-                    fileDownloadUri,
-                    file.getContentType(),
-                    file.getSize()
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-    }
-
-    @Operation(summary = "Get all photos of a company")
-    @GetMapping(value = "/{officeId}/photos", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public @ResponseBody byte[][] getPhotos(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
-        Optional<OfficePhoto[]> officePhotos = officePhotoService.getOfficePhotos(officeId);
-        return officePhotos.map(photos -> Arrays.stream(photos)
-                .map(OfficePhoto::getData).toArray(byte[][]::new)).orElseGet(() -> new byte[0][]);
-
-    }
-
-    @Operation(summary = "Upload photo for company")
-    @PostMapping("/{officeId}/photos")
-    public ResponseEntity<UploadFileResponse> uploadPhoto(@RequestHeader HttpHeaders headers,
-                                                         @PathVariable Long officeId,
-                                                         @RequestParam("file") MultipartFile file) {
-        OfficePhoto officePhoto = officePhotoService.storePhoto(officeId, file);
-
-        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/companies/" + officeId + "/logo/")
-                .path(officePhoto.getFileName())
-                .toUriString();
-        UploadFileResponse response = new UploadFileResponse(
-                officePhoto.getFileName(),
-                fileDownloadUri,
-                file.getContentType(),
-                file.getSize()
-        );
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @Operation(summary = "Delete photos for given company",
-            description = "Admin role required")
-    @DeleteMapping(value = "/{officeId}/photos/{photoId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removePhotos    (@RequestHeader HttpHeaders headers, @PathVariable Long officeId, @PathVariable String photoId) {
-        officePhotoService.deleteById(photoId);
     }
 
     // Fetch available data

@@ -83,7 +83,8 @@ public class BasicAuthenticationConfig {
 
                                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/favicon.ico").permitAll()
+                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/favicon.ico", "/error")
+                                    .permitAll()
                                 .anyRequest().authenticated()
                 )
                 // Add a filter to validate the tokens with every request

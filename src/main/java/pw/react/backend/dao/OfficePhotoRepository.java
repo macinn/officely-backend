@@ -10,5 +10,6 @@ import java.util.Optional;
 public interface OfficePhotoRepository extends JpaRepository<OfficePhoto, String> {
     Optional<OfficePhoto> findById(String id);
     Optional<OfficePhoto[]> findByOfficeId(long officeId);
+    Optional<OfficePhoto> findByOfficeIdAndIsMain(long officeId, boolean isMain);
     void deleteByOfficeId(long companyId);
 }

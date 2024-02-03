@@ -25,9 +25,11 @@ public record OfficeDto(
         String[] amenities,
         Office.OfficeType officeType,
         int rating,
-        int officeArea
+        int officeArea,
+        String mainPhoto,
+        String[] photos
 ) {
-    public static OfficeDto valueFrom(Office office) {
+    public static OfficeDto valueFrom(Office office, String mainPhoto, String[] photos) {
         return new OfficeDto(
                 office.getId(),
                 office.getName(),
@@ -40,7 +42,9 @@ public record OfficeDto(
                 Office.Amenities.getAmenities(office.getAmenities()),
                 office.getOfficeType(),
                 office.getRating(),
-                office.getOfficeArea()
+                office.getOfficeArea(),
+                mainPhoto,
+                photos
         );
     }
     public static Office convertToOffice(OfficeDto officeDto)

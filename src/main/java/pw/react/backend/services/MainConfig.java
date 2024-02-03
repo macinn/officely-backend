@@ -100,4 +100,5 @@ public class MainConfig {
                 .map(stream -> stream.collect(toSet()))
                 .orElseGet(HashSet::new);
     }
+
 }

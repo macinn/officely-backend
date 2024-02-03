@@ -24,28 +24,20 @@ class OfficePhotoService implements PhotoService {
     }
 
     @Override
-    public OfficePhoto storePhoto(long companyId, MultipartFile file) {
-        // Normalize file name
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
+    public OfficePhoto storePhoto(String fileUrl, String fileName, long companyId, boolean isMain) {
+        OfficePhoto newOfficePhoto = new OfficePhoto(fileUrl, fileName, companyId, isMain);
 
-        try {
-            // Check if the file's name contains invalid characters
-            if (fileName.contains("..")) {
-                throw new InvalidFileException("Sorry! Filename contains invalid path sequence " + fileName);
-            }
-
-            OfficePhoto newOfficePhoto = new OfficePhoto(fileName, file.getContentType(), companyId, file.getBytes());
-
-            return repository.save(newOfficePhoto);
-        } catch (IOException ex) {
-            throw new InvalidFileException("Could not store file " + fileName + ". Please try again!", ex);
-        }
+        return repository.save(newOfficePhoto);
     }
 
     @Override
     public Optional<OfficePhoto[]> getOfficePhotos(long companyId) {
-        return Optional.ofNullable(repository.findByOfficeId(companyId)
-                .orElseThrow(() -> new ResourceNotFoundException("File not found with companyId " + companyId)));
+        return repository.findByOfficeId(companyId);
+    }
+
+    @Override
+    public Optional<OfficePhoto> getOfficeMainPhoto(long officeId) {
+        return repository.findByOfficeIdAndIsMain(officeId, true);
     }
 
     @Override
