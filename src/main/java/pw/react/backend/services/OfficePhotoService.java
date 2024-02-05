@@ -42,6 +42,11 @@ class OfficePhotoService implements PhotoService {
     }
 
     @Override
+    public void deleteByUrl(long officeId, String photoUrl) {
+        repository.deleteByOfficeIdAndUrl(officeId, photoUrl);
+    }
+
+    @Override
     public Optional<OfficePhoto> getPhoto(String photoId) {
         return Optional.ofNullable(repository.findById(photoId)
                 .orElseThrow(() -> new ResourceNotFoundException("File not found with photoId " + photoId)));
@@ -50,13 +55,6 @@ class OfficePhotoService implements PhotoService {
     @Override
     public void deleteOfficePhotos(long companyId) {
         repository.deleteByOfficeId(companyId);
-        logger.info("Logo for the company with id {} deleted.", companyId);
-    }
-
-    @Override
-    public void deleteById(String photoId) {
-        repository.deleteById(photoId);
-        logger.info("Photo with id {} deleted.", photoId);
     }
 
 }

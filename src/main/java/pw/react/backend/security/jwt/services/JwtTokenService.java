@@ -11,6 +11,7 @@ import pw.react.backend.dao.TokenRepository;
 import pw.react.backend.models.Token;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.Serial;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;

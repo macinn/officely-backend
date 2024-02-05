@@ -30,15 +30,17 @@ public class UserController {
     @Operation(summary = "Register new users",
             description = "Only admin can add new admin account")
     @PostMapping(path = "")
+    @CrossOrigin
     public ResponseEntity<Collection<UserDto>> createUsers(Authentication authentication,
                                                            @RequestBody Collection<UserDto> users) {
         try {
             // check if admin is adding admin
-            if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER"))) {
-                if (users.stream().anyMatch(UserDto::isAdmin)) {
-                    throw new UserValidationException("User cannot add admin account", USERS_PATH);
+            if (users.stream().anyMatch(UserDto::isAdmin))
+                if (authentication == null ||
+                        authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER")))
+                {
+                        throw new UserValidationException("User cannot add admin account", USERS_PATH);
                 }
-            }
             Collection<UserDto> newUsers = userService.batchSave(
                     users.stream().map(UserDto::convertToUser).toList())
                     .stream()
@@ -54,6 +56,7 @@ public class UserController {
 
     @Operation(summary = "Query users")
     @GetMapping(path = "")
+    @CrossOrigin
     public ResponseEntity<Collection<UserDto>> getUsers(@RequestParam("pageSize") int pageSize,
                                                             @RequestParam("pageNum") int pageNum
     ) {
@@ -71,6 +74,7 @@ public class UserController {
 
     @Operation(summary = "Update user")
     @PutMapping(path = "/")
+    @CrossOrigin
     public ResponseEntity<UserDto> updateUser(Authentication authentication, @RequestBody UserDto user) {
         try {
             UserDto newUser = UserDto.valueFrom(userService.updatePassword(UserDto.convertToUser(user), authentication));

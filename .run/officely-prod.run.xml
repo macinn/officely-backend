@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="officely-prod" type="com.microsoft.intellij.run.configuration.WebAppConfigurationType" factoryName="Azure Web App">
+  <configuration default="false" name="officely-prod" type="com.microsoft.intellij.run.configuration.WebAppConfigurationType" factoryName="Azure Web App" singleton="false">
     <option name="appServicePlanName" value="" />
     <option name="appServicePlanResourceGroupName" value="" />
     <option name="appSettingsKey" value="0432a612-1e4a-4310-8c24-d4ce0fe624f3" />

@@ -53,6 +53,7 @@ public class OfficeController {
     }
 
     @Operation(summary = "Query offices")
+    @CrossOrigin
     @GetMapping(path = "")
     public ResponseEntity<Collection<OfficeDto>> getOffices(
             @RequestParam(required = true, name = "pageSize") int pageSize,
@@ -102,6 +103,7 @@ public class OfficeController {
 
     @Operation(summary = "Create new offices",
             description = "Admin role required")
+    @CrossOrigin
     @PostMapping(path = "")
     public ResponseEntity<Collection<OfficeDto>> createOffices(@RequestBody Collection<OfficeDto> offices) {
         try {
@@ -142,6 +144,7 @@ public class OfficeController {
     }
 
     @Operation(summary = "Get office by id")
+    @CrossOrigin
     @GetMapping(path = "/{officeId}")
     public ResponseEntity<OfficeDto> getById(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
         OfficeDto result = officeService.getById(officeId)
@@ -165,14 +168,27 @@ public class OfficeController {
     @Operation(summary = "Update office by id",
             description = "Admin role required")
     @PutMapping(path = "/{officeId}")
+    @CrossOrigin
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateOffice(@RequestHeader HttpHeaders headers, @PathVariable Long officeId,
-                              @Valid @RequestBody OfficeDto updatedOffice) {
-        officeService.updateOffice(officeId, OfficeDto.convertToOffice(updatedOffice));
+    public ResponseEntity<OfficeDto> updateOffice(@RequestHeader HttpHeaders headers, @PathVariable Long officeId,
+                                                  @RequestBody OfficeDto updatedOffice) {
+        Office office = officeService.updateOffice(officeId, OfficeDto.convertToOffice(updatedOffice));
+        String mainPhoto = "";
+        String[] photos = new String[0];
+        Optional<OfficePhoto> mainPhotoOptional = officePhotoService.getOfficeMainPhoto(office.getId());
+        if (mainPhotoOptional.isPresent()) {
+            mainPhoto = mainPhotoOptional.get().getUrl();
+        }
+        Optional<OfficePhoto[]> photosOptional = officePhotoService.getOfficePhotos(office.getId());
+        if (photosOptional.isPresent()) {
+            photos = Arrays.stream(photosOptional.get()).map(OfficePhoto::getUrl).toArray(String[]::new);
+        }
+        return ResponseEntity.ok(OfficeDto.valueFrom(office, mainPhoto, photos));
     }
 
     @Operation(summary = "Save office for later")
     @PostMapping(path = "/{officeId}/save")
+    @CrossOrigin(origins = "*")
     public boolean saveForLater(Authentication authentication, @PathVariable Long officeId) {
         User user = (User)authentication.getPrincipal();
         return savedService.save(officeId, user.getId());
@@ -180,6 +196,7 @@ public class OfficeController {
 
     @Operation(summary = "Delete saved office")
     @DeleteMapping(path = "/{officeId}/save")
+    @CrossOrigin(origins = "*")
     public boolean deleteSaved(Authentication authentication, @PathVariable Long officeId) {
         User user = (User)authentication.getPrincipal();
         return savedService.delete(officeId, user.getId());
@@ -188,6 +205,7 @@ public class OfficeController {
     @Operation(summary = "Delete office",
             description = "Admin role required")
     @DeleteMapping(path = "/{officeId}")
+    @CrossOrigin(origins = "*")
     public ResponseEntity<String> deleteOffice(@RequestHeader HttpHeaders headers, @PathVariable Long officeId) {
         boolean deleted = officeService.deleteOffice(officeId);
         if (!deleted) {
@@ -199,11 +217,13 @@ public class OfficeController {
     // Fetch available data
     @Operation(summary = "Fetch available amenities")
     @GetMapping(value = "/amenities/")
+    @CrossOrigin(origins = "*")
     public @ResponseBody String[] getAmenities(@RequestHeader HttpHeaders headers) {
         return Arrays.stream(Office.Amenities.values()).map(Enum::name).toArray(String[]::new);
     }
     @Operation(summary = "Fetch available office types")
     @GetMapping(value = "/office-types/")
+    @CrossOrigin(origins = "*")
     public @ResponseBody String[] getOfficeTypes(@RequestHeader HttpHeaders headers) {
         return Arrays.stream(Office.OfficeType.values()).map(Enum::name).toArray(String[]::new);
     }

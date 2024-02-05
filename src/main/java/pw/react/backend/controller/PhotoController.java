@@ -25,6 +25,7 @@ public class PhotoController {
     }
 
     @PostMapping("/main")
+    @CrossOrigin
     public ResponseEntity<String> uploadMain(@PathVariable Long id, @RequestParam MultipartFile file) throws IOException {
 
         String fileName = azureBlobAdapter.upload(file);
@@ -34,9 +35,8 @@ public class PhotoController {
         return ResponseEntity.ok(fileName);
     }
 
-
-
     @PostMapping()
+    @CrossOrigin
     public ResponseEntity<String> upload(@PathVariable Long id, @RequestParam MultipartFile file) throws IOException {
 
         String fileName = azureBlobAdapter.upload(file);
@@ -47,25 +47,46 @@ public class PhotoController {
     }
 
     @PostMapping("/main/url")
-    public ResponseEntity<String> uploadUrl(@PathVariable Long id, @RequestParam String fileUrl) throws IOException {
+    @CrossOrigin
+    public ResponseEntity<String> uploadUrl(@PathVariable Long id, @RequestBody UrlBody body) throws IOException {
 
-        String fileName = azureBlobAdapter.uploadFromUrl(fileUrl);
+        String fileName = azureBlobAdapter.uploadFromUrl(body.fileUrl);
         if(fileName == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        officePhotoService.storePhoto(fileName, new File(fileUrl).getName(), id, true);
+        officePhotoService.storePhoto(fileName, new File(body.fileUrl).getName(), id, true);
         return ResponseEntity.ok(fileName);
     }
 
     @PostMapping("/url")
-    public ResponseEntity<String> uploadMainUrl(@PathVariable Long id, @RequestParam String fileUrl) throws IOException {
+    @CrossOrigin
+    public ResponseEntity<String> uploadMainUrl(@PathVariable Long id, @RequestBody UrlBody body) throws IOException {
 
-        String fileName = azureBlobAdapter.uploadFromUrl(fileUrl);
+        String fileName = azureBlobAdapter.uploadFromUrl(body.fileUrl);
         if(fileName == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        officePhotoService.storePhoto(fileName, new File(fileUrl).getName(), id, false);
+        officePhotoService.storePhoto(fileName, new File(body.fileUrl).getName(), id, false);
         return ResponseEntity.ok(fileName);
     }
 
+    @DeleteMapping
+    @CrossOrigin
+    public ResponseEntity<String> deleteByUrl(@PathVariable Long id, @RequestBody UrlBody body)
+    {
+        officePhotoService.deleteByUrl(id, body.fileUrl);
+        return ResponseEntity.ok(body.fileUrl);
+    }
+
+    public static class UrlBody {
+        private String fileUrl;
+
+        public String getFileUrl() {
+            return fileUrl;
+        }
+
+        public void setFileUrl(String fileUrl) {
+            this.fileUrl = fileUrl;
+        }
+    }
 
 //    @GetMapping
 //    public ResponseEntity<List<String>> getAllBlobs() {

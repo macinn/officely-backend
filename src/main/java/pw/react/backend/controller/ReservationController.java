@@ -37,6 +37,7 @@ public class ReservationController {
 
     @Operation(summary = "Query reservations")
     @GetMapping(path = "")
+    @CrossOrigin
     public ResponseEntity<Collection<ReservationDto>> getAll(
             @RequestParam("pageSize") int pageSize,
             @RequestParam("pageNum") int pageNum,
@@ -57,6 +58,7 @@ public class ReservationController {
 
     @Operation(summary = "Create new reservations")
     @PostMapping(path = "")
+    @CrossOrigin
     public ResponseEntity<Collection<ReservationDto>> createReservations(@RequestBody Collection<ReservationDto> Reservations) {
         try {
             Collection<ReservationDto> newReservations = reservationService.batchSave(Reservations.stream().map(ReservationDto::convertToReservation).toList())
@@ -72,6 +74,7 @@ public class ReservationController {
 
     @Operation(summary = "Get reservation by id")
     @GetMapping(path = "/{reservationId}")
+    @CrossOrigin
     public ResponseEntity<ReservationDto> getById(@PathVariable Long reservationId) {
         ReservationDto result = reservationService.getById(reservationId)
                 .map(ReservationDto::valueFrom)
@@ -81,6 +84,7 @@ public class ReservationController {
 
     @Operation(summary = "Update reservation")
     @PutMapping(path = "/{reservationId}")
+    @CrossOrigin
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateReservation(Authentication authentication, @PathVariable Long reservationId,
                              @Valid @RequestBody ReservationDto updatedReservation) {
@@ -93,6 +97,7 @@ public class ReservationController {
 
     @Operation(summary = "Delete reservation")
     @DeleteMapping(path = "/{reservationId}")
+    @CrossOrigin
     public ResponseEntity<String> deleteReservation(Authentication authentication, @PathVariable Long reservationId) {
 
         userService.authenticate(reservationService.getById(reservationId)

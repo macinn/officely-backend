@@ -49,6 +49,7 @@ public class JwtConfig {
         return new JwtTokenService(secret, expirationMs, tokenRepository);
     }
 
+
     @Bean
     public OncePerRequestFilter jwtRequestFilter(CommonUserDetailsService commonUserDetailsService, JwtTokenService jwtTokenService) {
         return new JwtRequestFilter(commonUserDetailsService, jwtTokenService);

@@ -67,25 +67,27 @@ public class BasicAuthenticationConfig {
                 .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                                .requestMatchers(HttpMethod.POST, "/reservations/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/offices/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/users/**").permitAll()
-
-                                .requestMatchers(HttpMethod.PUT, "/reservations/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/offices/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/users/**").hasRole("ADMIN")
-
-                                .requestMatchers(HttpMethod.DELETE, "/reservations/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/offices/**").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
-
-                                .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+//                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+//
+//                                .requestMatchers(HttpMethod.POST, "/reservations/**").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.POST, "/offices/**").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.POST, "/users/**").permitAll()
+//
+//                                .requestMatchers(HttpMethod.PUT, "/reservations/**").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.PUT, "/offices/**").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.PUT, "/users/**").hasRole("ADMIN")
+//
+//                                .requestMatchers(HttpMethod.DELETE, "/reservations/**").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.DELETE, "/offices/**").hasRole("ADMIN")
+//                                .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
+//
+//                                .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/favicon.ico", "/error")
-                                    .permitAll()
+//                                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/favicon.ico", "/error")
+//                                .permitAll()
+                                .requestMatchers("offices/**").permitAll()
                                 .anyRequest().authenticated()
+//                               .anyRequest().permitAll()
                 )
                 // Add a filter to validate the tokens with every request
                 .addFilterBefore(basicAuthenticationRequestFilter, UsernamePasswordAuthenticationFilter.class)

@@ -7,11 +7,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import pw.react.backend.models.User;
 import pw.react.backend.security.common.AuthenticationService;
 import pw.react.backend.security.common.CommonUserDetailsService;
 import pw.react.backend.security.jwt.models.JwtRequest;
 import pw.react.backend.security.jwt.models.JwtResponse;
 import pw.react.backend.security.jwt.services.JwtTokenService;
+import pw.react.backend.web.UserDto;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping(path = JwtAuthenticationController.AUTHENTICATION_PATH)
@@ -33,12 +38,11 @@ public class JwtAuthenticationController {
     @PostMapping(path = "/login")
     public ResponseEntity<?> createAuthenticationToken(@Valid @RequestBody JwtRequest authenticationRequest,
                                                        HttpServletRequest request) throws Exception {
-
         authenticationService.authenticate(authenticationRequest.username(), authenticationRequest.password());
         UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.username());
         String token = jwtTokenService.generateToken(userDetails, request);
-
-        return ResponseEntity.ok(new JwtResponse(token));
+        User user = (User) userDetails;
+        return ResponseEntity.ok(new JwtResponse(token, UserDto.valueFrom(user)));
     }
 
     @PostMapping(path = "/logout")

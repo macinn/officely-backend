@@ -38,15 +38,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         //TODO: move to different filter
-        if (HttpMethod.OPTIONS.matches(request.getMethod())) {
-            // Handle preflight CORS request
-            response.setHeader("Access-Control-Allow-Origin", "*");
-            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-            response.setHeader("Access-Control-Allow-Headers", "*");
-            response.setHeader("Access-Control-Max-Age", "3600");
-            response.setStatus(HttpServletResponse.SC_OK);
-        }
-        else {
+//        if (HttpMethod.OPTIONS.matches(request.getMethod())) {
+//            // Handle preflight CORS request
+//            response.setHeader("Access-Control-Allow-Origin", "*");
+//            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+//            response.setHeader("Access-Control-Allow-Headers", "*");
+//            //response.setHeader("Access-Control-Max-Age", "3600");
+//            response.setStatus(HttpServletResponse.SC_OK);
+//        }
+//        else {
             String username = null;
             String jwtToken = null;
 
@@ -85,7 +85,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
 
             chain.doFilter(request, response);
-        }
+//        }
     }
 
 }
