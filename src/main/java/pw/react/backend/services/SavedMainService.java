@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import pw.react.backend.dao.SavedRepository;
 import pw.react.backend.models.Saved;
 
+import java.util.Collection;
 import java.util.Optional;
 
 public class SavedMainService implements SavedService{
@@ -41,6 +42,11 @@ public class SavedMainService implements SavedService{
             savedRepository.save(savedNew);
         }
         return true;
+    }
+
+    @Override
+    public Collection<Long> getSavedOffices(Long userId) {
+        return savedRepository.findByUserId(userId).stream().map(Saved::getOfficeId).toList();
     }
 
 }

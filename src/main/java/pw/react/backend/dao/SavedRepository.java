@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface SavedRepository extends JpaRepository<Saved, Long> {
     Optional<Saved> findByUserIdAndOfficeId(Long userId, Long officeId);
+    Optional<Saved> findByUserId(Long userId);
 }
