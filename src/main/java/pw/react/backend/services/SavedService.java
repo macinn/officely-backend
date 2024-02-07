@@ -1,8 +1,5 @@
 package pw.react.backend.services;
 
-import pw.react.backend.models.Office;
-import pw.react.backend.models.Saved;
-
 import java.util.Collection;
 
 public interface SavedService {

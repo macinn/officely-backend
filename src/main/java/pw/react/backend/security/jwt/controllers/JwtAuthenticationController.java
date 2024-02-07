@@ -15,9 +15,6 @@ import pw.react.backend.security.jwt.models.JwtResponse;
 import pw.react.backend.security.jwt.services.JwtTokenService;
 import pw.react.backend.web.UserDto;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestController
 @RequestMapping(path = JwtAuthenticationController.AUTHENTICATION_PATH)
 @Profile({"jwt"})
