@@ -194,6 +194,14 @@ public class OfficeController {
         return savedService.save(officeId, user.getId());
     }
 
+    @Operation(summary = "Get ids of saved offices for logged user")
+    @GetMapping(path = "/saved")
+    @CrossOrigin(origins = "*")
+    public ResponseEntity<Collection<Long>> getSaved(Authentication authentication) {
+        User user = (User)authentication.getPrincipal();
+        return ResponseEntity.ok(savedService.getSavedOffices(user.getId()));
+    }
+
     @Operation(summary = "Delete saved office")
     @DeleteMapping(path = "/{officeId}/save")
     @CrossOrigin(origins = "*")

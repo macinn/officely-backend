@@ -40,27 +40,6 @@ public class AzureBlobService {
         return blob.getBlobUrl();
     }
 
-//    public byte[] getFile(String fileName) throws URISyntaxException {
-//
-//        BlobClient blob = blobContainerClient.getBlobClient(fileName);
-//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//        blob.download(outputStream);
-//        final byte[] bytes = outputStream.toByteArray();
-//        return bytes;
-//
-//    }
-//
-//    public List<String> listBlobs() {
-//
-//        PagedIterable<BlobItem> items = blobContainerClient.listBlobs();
-//        List<String> names = new ArrayList<String>();
-//        for (BlobItem item : items) {
-//            names.add(item.getName());
-//        }
-//        return names;
-//
-//    }
-
     public Boolean deleteBlob(String blobName) {
 
         BlobClient blob = blobContainerClient.getBlobClient(blobName);

@@ -56,12 +56,16 @@ public class WebJwtSecurityConfig {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/offices/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                                //.anyRequest().permitAll()
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/offices/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/users/**").permitAll()
+
+                                .requestMatchers(HttpMethod.POST, "/offices/**").hasRole("ADMIN")
+
+                                .requestMatchers(HttpMethod.PUT, "/offices/**").hasRole("ADMIN")
+
+                                .requestMatchers(HttpMethod.DELETE, "/offices/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 // Add a filter to validate the tokens with every request

@@ -14,7 +14,7 @@ public class Office implements Serializable {
     private static final long serialVersionUID = 1707345223145276600L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
     @Column
     private String name;
     @Column
